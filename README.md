@@ -6,8 +6,7 @@ chains before your opponent while a shot clock counts down each turn.
 
 ## Play it
 
-Once GitHub Pages is enabled for this repo (see setup below), the game will
-be live at:
+The game willbe live at:
 
 ```
 https://<your-username>.github.io/numberduel/
