@@ -6,7 +6,7 @@ chains before your opponent while a shot clock counts down each turn.
 
 ## Play it
 
-The game willbe live at:
+The game will be live at:
 
 ```
 https://<your-username>.github.io/numberduel/
