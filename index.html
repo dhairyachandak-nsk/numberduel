@@ -268,7 +268,7 @@
     padding:9px 0;
     border-radius:3px;
     cursor:pointer;
-    transition:border-color .12s ease, color .12s ease;
+    transition:border-color .12s ease, color .12s ease, opacity .12s ease;
   }
   .chip:hover{color:var(--ink); border-color:var(--gold);}
   .chip.selected{
@@ -276,6 +276,51 @@
     background:var(--gold);
     border-color:var(--gold);
   }
+  .timer-sub{margin-top:-8px;}
+  .chips-disabled{
+    opacity:.35;
+    pointer-events:none;
+  }
+  .chips-disabled .chip:hover{color:var(--muted); border-color:var(--line);}
+
+  .warning-dropdown{
+    background:rgba(227,85,85,.06);
+    border:1px solid rgba(227,85,85,.4);
+    border-radius:4px;
+    margin-bottom:22px;
+    overflow:hidden;
+  }
+  .warning-dropdown summary{
+    cursor:pointer;
+    padding:11px 16px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    font-size:11.5px;
+    color:#e37a7a;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    user-select:none;
+  }
+  .warning-dropdown summary::-webkit-details-marker{display:none;}
+  .warning-dropdown summary .chev{
+    font-weight:700;
+    font-size:16px;
+    transition:transform .15s ease;
+    color:#e37a7a;
+  }
+  .warning-dropdown[open] summary .chev{transform:rotate(45deg);}
+  .warning-body{
+    padding:0 16px 14px;
+    font-size:12px;
+    line-height:1.6;
+    color:var(--muted);
+    border-top:1px solid rgba(227,85,85,.25);
+  }
+  .warning-body p{margin:10px 0 0;}
 
   .shot-clock{
     display:flex;
@@ -571,13 +616,45 @@
       </div>
       <div class="field">
         <label>Turn Timer</label>
-        <div class="timer-choice" id="timer-choice">
+        <div class="timer-choice" id="timer-toggle">
+          <button type="button" class="chip selected" data-val="off">Off</button>
+          <button type="button" class="chip" data-val="on">On</button>
+        </div>
+      </div>
+
+      <div class="field timer-sub" id="seconds-field">
+        <label>Seconds Per Turn</label>
+        <div class="timer-choice chips-disabled" id="timer-choice">
           <button type="button" class="chip" data-val="15">15s</button>
           <button type="button" class="chip selected" data-val="30">30s</button>
           <button type="button" class="chip" data-val="45">45s</button>
           <button type="button" class="chip" data-val="60">60s</button>
         </div>
       </div>
+
+      <div class="field timer-sub" id="penalty-field">
+        <label>Time-Out Penalty</label>
+        <div class="timer-choice chips-disabled" id="penalty-choice">
+          <button type="button" class="chip" data-val="5">-5</button>
+          <button type="button" class="chip selected" data-val="10">-10</button>
+          <button type="button" class="chip" data-val="15">-15</button>
+          <button type="button" class="chip" data-val="30">-30</button>
+        </div>
+      </div>
+
+      <details class="warning-dropdown">
+        <summary>Warning <span class="chev">+</span></summary>
+        <div class="warning-body">
+          <p>Turning on a turn timer opens the door to a strategic exploit: a player
+          stuck with no good move can simply let the clock run out on purpose instead
+          of playing a bad card, effectively "passing" for free. The time-out penalty
+          above exists specifically to discourage this — every time-out, whether on a
+          main turn or a star-card bonus, docks that player points (scores can go
+          negative). Pick a penalty steep enough to make stalling not worth it, or
+          just leave the timer off entirely for relaxed, untimed play.</p>
+        </div>
+      </details>
+
       <details class="rules-dropdown">
         <summary>How to Play <span class="chev">+</span></summary>
         <div class="rules-body">
@@ -627,29 +704,32 @@
           new chain.</p>
 
           <h4>Star Cards (★)</h4>
-          <p>One <code>&divide;</code> and one bracket <code>{ }</code> per element are
+          <p>One <code>&divide;</code> and one <code>&minus;</code> per element are
           marked with a star. Playing a star card doesn't end your turn — you
           immediately get a free follow-up play of a number card onto that same chain,
-          no extra turn needed. That bonus play runs on its own fixed 15-second clock
-          (see below).</p>
+          no extra turn needed. If the turn timer is on, that bonus play always runs
+          on its own fixed 15-second clock, separate from your main turn timer.</p>
 
           <h4>Dividing by Zero</h4>
           <p>Not allowed. If a <code>&divide;</code> card is on top of a chain, you
           can't play a <code>0</code> right after it — the game will simply block the
           move.</p>
 
-          <h4>Turn Timer</h4>
-          <p>Choose 15, 30, 45, or 60 seconds before the duel starts — that's how long
-          each player gets per turn. Let the clock hit zero and your turn is forfeited
-          to your opponent, no card played. The one exception is the star-card bonus
-          play, which always gets its own fixed 15 seconds regardless of what you
-          picked for the main timer.</p>
+          <h4>Turn Timer (Optional)</h4>
+          <p>Off by default — Numberduel is untimed unless you turn this on. Switch it
+          on and pick 15, 30, 45, or 60 seconds per turn; let the clock hit zero and
+          your turn is forfeited to your opponent, no card played. You also pick a
+          time-out penalty (&minus;5, &minus;10, &minus;15, or &minus;30 points),
+          deducted from whoever let the clock run out — on either a main turn or a
+          star-card bonus — specifically to discourage stalling on purpose to dodge a
+          bad position. See the Warning note above the rules for more on that.</p>
 
           <h4>End of the Duel</h4>
           <p>The game ends the moment it becomes a player's turn and they have no
           legal move anywhere — no card in hand fits any open chain, and no card can
           start a new one (or all 3 slots are already full of chains they can't
-          extend). Scores are tallied and whoever has more points wins.</p>
+          extend). Scores are tallied (penalties and all) and whoever has more points
+          wins.</p>
 
         </div>
       </details>
@@ -738,10 +818,10 @@
       }
       const ops = [
         ['+',false], ['+',false],
-        ['-',false], ['-',false],
+        ['-',false], ['-',true],
         ['*',false], ['*',false],
         ['/',false], ['/',true],
-        ['{}',false], ['{}',true]
+        ['{}',false], ['{}',false]
       ];
       ops.forEach(([op,star])=>{
         deck.push({id:uid(), element:el.key, kind:'op', op, star});
@@ -890,7 +970,9 @@
   let bonusChainIndex = null;
 
   const BONUS_SECONDS = 15; // fixed, not configurable
-  let selectedTurnSeconds = 30; // default, changed via setup chips
+  let selectedTurnSeconds = 30; // default, changed via setup chips — only used if timer is enabled
+  let selectedPenalty = 10;     // default, changed via setup chips — only used if timer is enabled
+  let timerEnabled = false;     // off by default — the whole timer feature is opt-in
 
   // ---------------- Shot Clock ----------------
   let shotClockInterval = null;
@@ -898,6 +980,17 @@
 
   function clearShotClock(){
     if(shotClockInterval){ clearInterval(shotClockInterval); shotClockInterval = null; }
+    const wrap = document.getElementById('shot-clock');
+    if(wrap) wrap.classList.toggle('hidden', !state || !state.timerEnabled);
+  }
+
+  // Only ever starts a real countdown if the timer is enabled for this game.
+  function maybeStartShotClock(seconds, label, onExpire){
+    if(!state || !state.timerEnabled){
+      clearShotClock();
+      return;
+    }
+    startShotClock(seconds, label, onExpire);
   }
 
   function startShotClock(seconds, label, onExpire){
@@ -1111,7 +1204,7 @@
         bonusChainIndex = idx;
         document.getElementById('bonus-banner').classList.remove('hidden');
         render();
-        startShotClock(BONUS_SECONDS, 'Bonus', bonusTimeout);
+        maybeStartShotClock(BONUS_SECONDS, 'Bonus', bonusTimeout);
         return;
       }
     }
@@ -1128,6 +1221,13 @@
     endTurn();
   }
 
+  function applyTimeoutPenalty(){
+    if(!state.timerEnabled || !state.penalty) return;
+    const player = state.players[state.turn];
+    player.score -= state.penalty;
+    return state.penalty;
+  }
+
   function skipBonus(reason){
     if(!bonusMode) return;
     clearShotClock();
@@ -1135,7 +1235,8 @@
     bonusChainIndex = null;
     document.getElementById('bonus-banner').classList.add('hidden');
     if(reason === 'timeout'){
-      log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time on the bonus — skipped.');
+      const penalty = applyTimeoutPenalty();
+      log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time on the bonus'+(penalty ? ' — <span class="score">-'+penalty.toFixed(2)+' pts</span>' : '')+'.');
     }
     endTurn();
   }
@@ -1163,13 +1264,14 @@
     checkGameOver();
     render();
     if(!state.gameOver){
-      startShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
     }
   }
 
   function mainTimeout(){
     if(state.gameOver || bonusMode) return;
-    log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time — turn forfeited.');
+    const penalty = applyTimeoutPenalty();
+    log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time — turn forfeited'+(penalty ? ' — <span class="score">-'+penalty.toFixed(2)+' pts</span>' : '')+'.');
     selectedCardId = null;
     endTurn();
   }
@@ -1214,11 +1316,29 @@
     document.getElementById('setup-screen').classList.remove('hidden');
   });
 
+  document.getElementById('timer-toggle').querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('timer-toggle').querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      timerEnabled = (btn.dataset.val === 'on');
+      document.getElementById('timer-choice').classList.toggle('chips-disabled', !timerEnabled);
+      document.getElementById('penalty-choice').classList.toggle('chips-disabled', !timerEnabled);
+    });
+  });
+
   document.querySelectorAll('#timer-choice .chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.querySelectorAll('#timer-choice .chip').forEach(b=>b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedTurnSeconds = parseInt(btn.dataset.val, 10);
+    });
+  });
+
+  document.querySelectorAll('#penalty-choice .chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#penalty-choice .chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedPenalty = parseInt(btn.dataset.val, 10);
     });
   });
 
@@ -1239,7 +1359,9 @@
       chains:[null,null,null],
       turn:0,
       gameOver:false,
-      turnSeconds: selectedTurnSeconds
+      timerEnabled: timerEnabled,
+      turnSeconds: selectedTurnSeconds,
+      penalty: selectedPenalty
     };
     selectedCardId = null;
     bonusMode = false;
@@ -1248,12 +1370,14 @@
     document.getElementById('log').innerHTML = '';
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
-    log('Deck shuffled. '+p1name+' and '+p2name+' each drew '+handSize+' cards. Turn timer: '+selectedTurnSeconds+'s.');
+    document.getElementById('shot-clock').classList.toggle('hidden', !state.timerEnabled);
+    log('Deck shuffled. '+p1name+' and '+p2name+' each drew '+handSize+' cards.'
+      + (state.timerEnabled ? ' Turn timer: '+state.turnSeconds+'s (time-out penalty: -'+state.penalty+' pts).' : ' Untimed game.'));
 
     checkGameOver();
     render();
     if(!state.gameOver){
-      startShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
     }
   }
 
