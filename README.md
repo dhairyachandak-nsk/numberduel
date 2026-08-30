@@ -13,7 +13,7 @@ Once GitHub Pages is enabled for this repo (see setup below), the game is
 live at:
 
 ```
-https://<your-username>.github.io/numberduel/
+https://dhairyachandak-nsk.github.io/numberduel/
 ```
 
 ## Screenshot
