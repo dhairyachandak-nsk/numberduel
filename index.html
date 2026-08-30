@@ -4,6 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>NUMBERDUEL</title>
+<meta name="description" content="A duel of chains and numbers — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+
+<!-- Open Graph / social preview. Note: og:image is a relative path — for full
+     compatibility with every platform (some require an absolute URL), replace
+     these three "og:*" and "twitter:image" hrefs with your full GitHub Pages
+     URL once the site is live, e.g. https://<username>.github.io/numberduel/social-preview.png -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Numberduel">
+<meta property="og:description" content="A duel of chains and numbers — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+<meta property="og:image" content="social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Numberduel">
+<meta name="twitter:description" content="A duel of chains and numbers — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+<meta name="twitter:image" content="social-preview.png">
+
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
@@ -136,6 +151,7 @@
     font-weight:700;
     cursor:pointer;
     transition:transform .12s ease, box-shadow .12s ease;
+    touch-action:manipulation;
   }
   .btn:hover{transform:translateY(-1px); box-shadow:0 4px 14px rgba(230,200,120,.25);}
   .btn:active{transform:translateY(0);}
@@ -372,9 +388,40 @@
   .chain-slot.selectable{
     cursor:pointer;
     border-color:var(--gold);
+    touch-action:manipulation;
   }
   .chain-slot.selectable:hover{
     box-shadow:0 0 0 1px var(--gold), 0 0 18px rgba(230,200,120,.18);
+  }
+  .chain-slot.pending{
+    border-color:var(--gold);
+    box-shadow:0 0 0 2px var(--gold), 0 0 26px rgba(230,200,120,.35);
+    animation:pendingPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pendingPulse{
+    0%,100%{ box-shadow:0 0 0 2px var(--gold), 0 0 20px rgba(230,200,120,.25); }
+    50%{ box-shadow:0 0 0 2px var(--gold), 0 0 32px rgba(230,200,120,.5); }
+  }
+  .chain-expr .tok.ghost{ opacity:.45; }
+  .chain-expr .tok.resolved-value{
+    color:var(--gold);
+    font-weight:700;
+    margin-left:2px;
+  }
+  .chain-expr.resolved{
+    animation: resolveCollapse 0.9s ease-out forwards;
+  }
+  @keyframes resolveCollapse{
+    0%{ opacity:1; transform:scale(1); }
+    45%{ opacity:1; transform:scale(1.08); }
+    100%{ opacity:0; transform:scale(0.82); }
+  }
+  .chain-slot.resolved-flash{
+    animation: resolveFlash 0.9s ease-out forwards;
+  }
+  @keyframes resolveFlash{
+    0%{ box-shadow:0 0 0 2px var(--gold), 0 0 40px rgba(230,200,120,.55); background:rgba(230,200,120,.10); }
+    100%{ box-shadow:none; background:transparent; }
   }
   .chain-slot .slot-head{
     display:flex;
@@ -467,6 +514,7 @@
     font-size:20px;
     transition:transform .1s ease, border-color .1s ease;
     user-select:none;
+    touch-action:manipulation;
   }
   .card:hover{transform:translateY(-4px);}
   .card.sun{color:var(--sun); border-color:var(--sun-dim);}
@@ -478,6 +526,13 @@
     transform:translateY(-6px);
   }
   .card.disabled{opacity:.28; cursor:not-allowed; transform:none;}
+  .card.ai-card-back{
+    cursor:default;
+    background:repeating-linear-gradient(135deg, #17171d 0px, #17171d 6px, #101014 6px, #101014 12px);
+    border-color:var(--line);
+  }
+  .card.ai-card-back:hover{ transform:none; }
+  .board.ai-turn-lock .chain-slot{ opacity:.75; }
   .card .star{
     position:absolute;
     top:3px; right:4px;
@@ -569,6 +624,33 @@
   .over-score div{font-family:'JetBrains Mono',monospace;}
   .over-score .num{font-size:30px; font-weight:700;}
 
+  .over-stats{
+    text-align:left;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px 18px;
+    margin-bottom:24px;
+    font-size:12.5px;
+    line-height:1.9;
+  }
+  .over-stats .stat-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    color:var(--muted);
+  }
+  .over-stats .stat-row b{
+    color:var(--ink);
+    font-weight:600;
+    text-align:right;
+  }
+  .over-stats .stat-row + .stat-row{
+    border-top:1px solid var(--line);
+    padding-top:6px;
+    margin-top:2px;
+  }
+
   footer{
     text-align:center;
     color:var(--muted);
@@ -581,6 +663,31 @@
     .board{grid-template-columns:1fr;}
     .scoreboard{flex-direction:column;}
     .title-sword{height:34px;}
+
+    /* Dense hands (up to 28 cards) become a swipeable strip instead of
+       wrapping into many rows — far easier to browse with a thumb. */
+    .hand{
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      overflow-y:visible;
+      scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch;
+      gap:10px;
+      padding:6px 4px 14px;
+      margin:0 -4px;
+    }
+    .card{
+      flex-shrink:0;
+      scroll-snap-align:start;
+      width:62px;
+      height:84px;
+      font-size:22px;
+    }
+    .card:hover{ transform:none; } /* avoid sticky-hover lift on touch devices */
+    .card.selected{ transform:translateY(-4px); }
+
+    .controls-row{ flex-wrap:wrap; }
+    .btn.small{ padding:9px 16px; font-size:13px; }
   }
   @media (max-width:480px){
     .title-sword{display:none;}
@@ -607,15 +714,21 @@
     <div class="setup-card">
       <h2>Begin the Duel</h2>
       <div class="field">
+        <label>Opponent</label>
+        <div class="timer-choice" id="mode-toggle">
+          <button type="button" class="chip selected" data-val="pvp">2 Players</button>
+          <button type="button" class="chip" data-val="ai">vs AI</button>
+        </div>
+      </div>
+      <div class="field">
         <label>Duelist One</label>
         <input type="text" id="p1name" placeholder="Player 1" maxlength="16">
       </div>
-      <div class="field">
+      <div class="field" id="p2-field">
         <label>Duelist Two</label>
         <input type="text" id="p2name" placeholder="Player 2" maxlength="16">
       </div>
-      <div class="field">
-        <label>Turn Timer</label>
+      <div class="field">        <label>Turn Timer</label>
         <div class="timer-choice" id="timer-toggle">
           <button type="button" class="chip selected" data-val="off">Off</button>
           <button type="button" class="chip" data-val="on">On</button>
@@ -679,6 +792,13 @@
           separate lanes — a Sun chain, a Snow chain, and a Sky chain can all be open
           side by side.</p>
 
+          <h4>Opponent: 2 Players or AI</h4>
+          <p>Play locally against a friend, or switch to <b>vs AI</b> on the setup
+          screen for a single-player practice opponent. The AI always plays second,
+          its hand stays hidden (you'll just see face-down cards and a "Thinking…"
+          message), and it plays via a simple greedy heuristic — it's a reasonable
+          practice partner, not an unbeatable one.</p>
+
           <h4>What Counts as a Legal Play</h4>
           <p>Think of a chain as a sentence that has to stay grammatically valid:</p>
           <p>&bull; A chain must <i>start</i> with a number or an opening bracket.<br>
@@ -686,6 +806,12 @@
           play two numbers in a row).<br>
           &bull; An operator (<code>+ &minus; &times; &divide;</code>) can only follow
           a number or a closed bracket (you can't play two operators in a row).</p>
+
+          <h4>Confirming a Play</h4>
+          <p>Selecting a card and clicking a chain doesn't commit it right away —
+          you'll see a ghost preview of the card in that slot plus Confirm/Cancel
+          buttons, so a misclick can't lock in a move you didn't mean to make. The
+          turn timer, if it's on, keeps running the whole time.</p>
 
           <h4>Brackets Self-Close</h4>
           <p>There's only one bracket card, and you never "close" it yourself — a
@@ -729,10 +855,14 @@
           legal move anywhere — no card in hand fits any open chain, and no card can
           start a new one (or all 3 slots are already full of chains they can't
           extend). Scores are tallied (penalties and all) and whoever has more points
-          wins.</p>
+          wins — along with a quick breakdown of the match's biggest chain, most-used
+          element, average chain value, and longest bracket expression.</p>
 
         </div>
       </details>
+      <div style="text-align:center; margin:-6px 0 22px;">
+        <a href="rules.html" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--muted);">Open full rules as a shareable page &#8599;</a>
+      </div>
       <button class="btn" id="start-btn">Deal &amp; Begin</button>
     </div>
   </div>
@@ -773,8 +903,10 @@
         <span class="hint" id="hand-hint">Select a card, then a chain.</span>
       </div>
       <div class="hand" id="hand"></div>
-      <div class="controls-row">
+      <div class="controls-row" id="controls-row">
         <button class="btn ghost small" id="deselect-btn">Deselect</button>
+        <button class="btn small hidden" id="confirm-placement-btn">Confirm Play</button>
+        <button class="btn ghost small hidden" id="cancel-placement-btn">Cancel</button>
       </div>
     </div>
 
@@ -792,6 +924,7 @@
       <div><div id="over-n0" class="num">0</div><div id="over-l0"></div></div>
       <div><div id="over-n1" class="num">0</div><div id="over-l1"></div></div>
     </div>
+    <div class="over-stats" id="over-stats"></div>
     <button class="btn" id="restart-btn">Duel Again</button>
   </div>
 </div>
@@ -949,6 +1082,23 @@
     return Math.round(val * 100) / 100;
   }
 
+  // Clones the given chain (or starts a fresh one) and applies the pending card to the
+  // CLONE only, purely so render() can show a ghost preview without touching real state.
+  function buildPreviewChain(chain, cardId){
+    const card = findCardInHand(cardId);
+    if(!card) return chain;
+    let preview;
+    if(chain === null){
+      preview = newChain();
+      preview.element = card.element;
+    } else {
+      preview = JSON.parse(JSON.stringify(chain));
+    }
+    if(wouldDivideByZero(card, preview)) return chain || preview;
+    applyCardToChain(card, preview);
+    return preview;
+  }
+
   function hasLegalMove(player){
     const openSlots = activeChainCount() < 3;
     for(const card of player.hand){
@@ -966,8 +1116,33 @@
 
   // ---------------- UI State ----------------
   let selectedCardId = null;
+  let pendingPlacement = null; // {cardId, slotIdx} — awaiting Confirm/Cancel before it actually commits
   let bonusMode = false; // true when we're in "play a free number card" sub-turn
   let bonusChainIndex = null;
+
+  // ---------------- Match Stats (for the post-game breakdown) ----------------
+  function freshMatchStats(){
+    return {
+      chains: [],                          // {value, element, playerIdx, tokenCount, hadBracket, expr}
+      elementCounts: {sun:0, snow:0, sky:0} // cards played, across both players
+    };
+  }
+  let matchStats = freshMatchStats();
+
+  function recordCardPlayed(card){
+    matchStats.elementCounts[card.element] = (matchStats.elementCounts[card.element]||0) + 1;
+  }
+
+  function recordChainResolved(chain, value, playerIdx){
+    matchStats.chains.push({
+      value: value,
+      element: chain.element,
+      playerIdx: playerIdx,
+      tokenCount: chain.tokens.length,
+      hadBracket: chain.tokens.indexOf('(') !== -1,
+      expr: chain.tokens.join(' ')
+    });
+  }
 
   const BONUS_SECONDS = 15; // fixed, not configurable
   let selectedTurnSeconds = 30; // default, changed via setup chips — only used if timer is enabled
@@ -1063,24 +1238,61 @@
       slot.appendChild(head);
 
       if(!chain){
-        const empty = document.createElement('div');
-        empty.className = 'chain-empty';
-        empty.textContent = 'Open — play a card to start a chain';
-        slot.appendChild(empty);
+        if(pendingPlacement && pendingPlacement.slotIdx === i){
+          const previewChain = buildPreviewChain(null, pendingPlacement.cardId);
+          const expr = document.createElement('div');
+          expr.className = 'chain-expr';
+          (previewChain ? previewChain.display : []).forEach(t=>{
+            const s = document.createElement('span');
+            s.className = 'tok ghost ' + t.kind;
+            s.textContent = t.sym;
+            expr.appendChild(s);
+          });
+          slot.appendChild(expr);
+        } else if(resolveFlashes[i]){
+          const flash = resolveFlashes[i];
+          const expr = document.createElement('div');
+          expr.className = 'chain-expr resolved';
+          flash.display.forEach(t=>{
+            const s = document.createElement('span');
+            s.className = 'tok ' + t.kind;
+            s.textContent = t.sym;
+            expr.appendChild(s);
+          });
+          const eq = document.createElement('span');
+          eq.className = 'tok resolved-value';
+          eq.textContent = ' = ' + flash.value.toFixed(2);
+          expr.appendChild(eq);
+          slot.appendChild(expr);
+          slot.classList.add('resolved-flash');
+        } else {
+          const empty = document.createElement('div');
+          empty.className = 'chain-empty';
+          empty.textContent = 'Open — play a card to start a chain';
+          slot.appendChild(empty);
+        }
       } else {
         const expr = document.createElement('div');
         expr.className = 'chain-expr';
-        chain.display.forEach(t=>{
+        const isPendingHere = pendingPlacement && pendingPlacement.slotIdx === i;
+        const previewChain = isPendingHere ? buildPreviewChain(chain, pendingPlacement.cardId) : null;
+        const tokensToShow = previewChain ? previewChain.display : chain.display;
+        tokensToShow.forEach((t, ti)=>{
           const s = document.createElement('span');
-          s.className = 'tok ' + t.kind;
+          const isGhostTok = isPendingHere && ti >= chain.display.length;
+          s.className = 'tok ' + t.kind + (isGhostTok ? ' ghost' : '');
           s.textContent = t.sym;
           expr.appendChild(s);
         });
         slot.appendChild(expr);
       }
 
+      if(pendingPlacement && pendingPlacement.slotIdx === i){
+        slot.classList.add('pending');
+      }
+
       // selectable?
-      if(!state.gameOver && selectedCardId){
+      if(!state.gameOver && selectedCardId && !pendingPlacement){
         const card = findCardInHand(selectedCardId);
         if(card){
           let legal;
@@ -1100,14 +1312,35 @@
     }
 
     // hand
-    const activePlayer = bonusMode ? state.players[state.turn] : state.players[state.turn];
-    document.getElementById('hand-owner').textContent = activePlayer.name + "'s Hand";
-    document.getElementById('hand-hint').textContent = bonusMode
+    const activePlayer = state.players[state.turn];
+    const aiTurn = isAiTurn();
+    document.getElementById('hand-owner').textContent = aiTurn ? activePlayer.name : (activePlayer.name + "'s Hand");
+    document.getElementById('hand-hint').textContent = aiTurn
+      ? 'Thinking\u2026'
+      : pendingPlacement
+      ? 'Confirm to lock in this play, or cancel to pick again.'
+      : bonusMode
       ? 'Star bonus: pick a number card, or skip.'
       : (selectedCardId ? 'Now click a chain to place it.' : 'Select a card to play.');
 
+    document.getElementById('deselect-btn').classList.toggle('hidden', !!pendingPlacement || aiTurn);
+    document.getElementById('confirm-placement-btn').classList.toggle('hidden', !pendingPlacement || aiTurn);
+    document.getElementById('cancel-placement-btn').classList.toggle('hidden', !pendingPlacement || aiTurn);
+
     const handEl = document.getElementById('hand');
     handEl.innerHTML = '';
+
+    if(aiTurn){
+      for(let k=0;k<activePlayer.hand.length;k++){
+        const back = document.createElement('div');
+        back.className = 'card ai-card-back';
+        handEl.appendChild(back);
+      }
+      board.classList.add('ai-turn-lock');
+      return;
+    }
+    board.classList.remove('ai-turn-lock');
+
     const hand = state.players[state.turn].hand;
     hand.forEach(card=>{
       const c = document.createElement('div');
@@ -1116,6 +1349,8 @@
 
       let playable;
       if(state.gameOver){
+        playable = false;
+      } else if(pendingPlacement){
         playable = false;
       } else if(bonusMode){
         playable = card.kind==='number' && canPlayOnChain(card, state.chains[bonusChainIndex]) && !wouldDivideByZero(card, state.chains[bonusChainIndex]);
@@ -1142,6 +1377,8 @@
 
   function onCardClick(card){
     if(state.gameOver) return;
+    if(isAiTurn()) return;
+    if(pendingPlacement) return;
     if(bonusMode){
       if(card.kind !== 'number') return;
       const chain = state.chains[bonusChainIndex];
@@ -1150,6 +1387,7 @@
       clearShotClock();
       removeCardFromHand(card.id);
       applyCardToChain(card, chain);
+      recordCardPlayed(card);
       log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> plays free number <b>'+card.value+'</b> (bonus).');
       finishBonusAndMaybeResolve(bonusChainIndex);
       return;
@@ -1169,17 +1407,14 @@
   }
 
   function onSlotClick(idx){
-    if(state.gameOver || bonusMode) return;
+    if(state.gameOver || bonusMode || pendingPlacement || isAiTurn()) return;
     const card = findCardInHand(selectedCardId);
     if(!card) return;
-    let chain = state.chains[idx];
+    const chain = state.chains[idx];
 
     if(chain === null){
       if(activeChainCount() >= 3) return;
       if(!canPlayOnChain(card, null)) return;
-      chain = newChain();
-      chain.element = card.element;
-      state.chains[idx] = chain;
     } else {
       if(!canPlayOnChain(card, chain)) return;
       if(wouldDivideByZero(card, chain)){
@@ -1188,11 +1423,41 @@
       }
     }
 
+    // Stage it — nothing is committed yet. render() will show a ghost preview
+    // in this slot plus Confirm/Cancel controls, so a misclick can't lock in a move.
+    pendingPlacement = { cardId: card.id, slotIdx: idx };
+    render();
+  }
+
+  function cancelPlacement(){
+    if(!pendingPlacement) return;
+    pendingPlacement = null;
+    render();
+  }
+
+  function commitPlacement(){
+    if(!pendingPlacement) return;
+    const { cardId, slotIdx } = pendingPlacement;
+    pendingPlacement = null;
+    const card = findCardInHand(cardId);
+    if(!card){ render(); return; } // shouldn't happen, but never crash on a stale reference
+
+    let chain = state.chains[slotIdx];
+    if(chain === null){
+      if(activeChainCount() >= 3 || !canPlayOnChain(card, null)){ render(); return; }
+      chain = newChain();
+      chain.element = card.element;
+      state.chains[slotIdx] = chain;
+    } else {
+      if(!canPlayOnChain(card, chain) || wouldDivideByZero(card, chain)){ render(); return; }
+    }
+
     clearShotClock();
     removeCardFromHand(card.id);
     applyCardToChain(card, chain);
+    recordCardPlayed(card);
     const sym = card.kind==='number' ? String(card.value) : (card.op==='{}' ? '{ }' : OP_SYMBOL[card.op]);
-    log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> plays <b>'+sym+'</b>'+(card.star?' \u2605':'')+' on Chain '+(idx+1)+'.');
+    log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> plays <b>'+sym+'</b>'+(card.star?' \u2605':'')+' on Chain '+(slotIdx+1)+'.');
 
     selectedCardId = null;
 
@@ -1201,7 +1466,7 @@
       const hasBonusMove = state.players[state.turn].hand.some(c=>c.kind==='number' && canPlayOnChain(c, chain) && !wouldDivideByZero(c, chain));
       if(hasBonusMove){
         bonusMode = true;
-        bonusChainIndex = idx;
+        bonusChainIndex = slotIdx;
         document.getElementById('bonus-banner').classList.remove('hidden');
         render();
         maybeStartShotClock(BONUS_SECONDS, 'Bonus', bonusTimeout);
@@ -1209,7 +1474,7 @@
       }
     }
 
-    maybeResolveChain(idx);
+    maybeResolveChain(slotIdx);
     endTurn();
   }
 
@@ -1245,18 +1510,137 @@
     skipBonus('timeout');
   }
 
+  const RESOLVE_FLASH_MS = 900;
+  let resolveFlashes = {}; // idx -> {display, value} — purely cosmetic, doesn't affect legality
+
   function maybeResolveChain(idx){
     const chain = state.chains[idx];
     if(chain && isComplete(chain)){
       const value = evalChain(chain);
       state.players[state.turn].score += value;
+      recordChainResolved(chain, value, state.turn);
       log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> completes Chain '+(idx+1)+' — <span class="score">+'+value.toFixed(2)+' pts</span> ('+chain.tokens.join(' ')+' = '+value.toFixed(2)+')');
+      resolveFlashes[idx] = { display: chain.display.slice(), value: value };
       state.chains[idx] = null;
+      setTimeout(()=>{ delete resolveFlashes[idx]; render(); }, RESOLVE_FLASH_MS);
     }
   }
 
   function flashHint(msg){
     document.getElementById('hand-hint').textContent = msg;
+  }
+
+  // ---------------- AI Opponent ----------------
+  // A greedy 1-ply heuristic — not unbeatable, but a reasonable practice opponent.
+  // It always takes the best-scoring immediate move it can find; it doesn't plan
+  // multiple turns ahead or model what the human will do in response.
+
+  function isAiTurn(){
+    return !!(state && state.mode === 'ai' && state.turn === state.aiPlayerIndex && !state.gameOver);
+  }
+
+  function scheduleAiTurn(){
+    if(!isAiTurn()) return;
+    const myTurnToken = state.turn;
+    setTimeout(()=>{
+      // Guard against a restarted/changed game firing a stale callback.
+      if(!state || !isAiTurn() || state.turn !== myTurnToken) return;
+      aiTakeTurn();
+    }, 850 + Math.random()*550);
+  }
+
+  function cloneChainForSim(chain){
+    return JSON.parse(JSON.stringify(chain));
+  }
+
+  // Heuristic score for playing `card` into `chain` (chain===null starts a new one).
+  // Simulated on a clone — never touches real game state.
+  function scoreCandidateMove(card, chain){
+    const sim = chain ? cloneChainForSim(chain) : newChain();
+    if(chain === null) sim.element = card.element;
+    if(wouldDivideByZero(card, sim)) return -Infinity;
+    applyCardToChain(card, sim);
+    if(isComplete(sim)){
+      const value = evalChain(sim);
+      return value * 2.2 + (card.star ? 1.5 : 0);
+    }
+    // Not complete yet: mild preference for star cards (extra tempo), and a mild
+    // penalty for leaving a well-developed chain one card from done, since the
+    // opponent could snipe it next turn.
+    const frame = sim.frames[sim.frames.length-1];
+    let riskPenalty = 0;
+    if(sim.frames.length === 1 && frame.expectValue === true && frame.opCount >= 1){
+      riskPenalty = 0.6 * frame.opCount;
+    }
+    return 0.4 + (card.star ? 1.2 : 0) - riskPenalty + Math.random()*0.3;
+  }
+
+  function collectLegalMoves(player){
+    const moves = [];
+    const openSlots = activeChainCount() < 3;
+    for(const card of player.hand){
+      for(let i=0;i<3;i++){
+        const chain = state.chains[i];
+        if(chain === null){
+          if(openSlots && canPlayOnChain(card, null)) moves.push({card, slotIdx:i, chain:null});
+        } else if(canPlayOnChain(card, chain) && !wouldDivideByZero(card, chain)){
+          moves.push({card, slotIdx:i, chain});
+        }
+      }
+    }
+    return moves;
+  }
+
+  function pickBestMove(moves){
+    let best = null, bestScore = -Infinity;
+    for(const m of moves){
+      const s = scoreCandidateMove(m.card, m.chain);
+      if(s > bestScore){ bestScore = s; best = m; }
+    }
+    return best;
+  }
+
+  function aiTakeTurn(){
+    const player = state.players[state.turn];
+    const moves = collectLegalMoves(player);
+    if(moves.length === 0){
+      // Shouldn't happen — checkGameOver() would have ended the game first — but never hang.
+      endTurn();
+      return;
+    }
+    const move = pickBestMove(moves);
+    const idx = move.slotIdx;
+    let chain = state.chains[idx];
+    if(chain === null){
+      chain = newChain();
+      chain.element = move.card.element;
+      state.chains[idx] = chain;
+    }
+
+    clearShotClock();
+    removeCardFromHand(move.card.id);
+    applyCardToChain(move.card, chain);
+    recordCardPlayed(move.card);
+    const sym = move.card.kind==='number' ? String(move.card.value) : (move.card.op==='{}' ? '{ }' : OP_SYMBOL[move.card.op]);
+    log('<span class="'+playerColorClass(state.turn)+'">'+player.name+'</span> plays <b>'+sym+'</b>'+(move.card.star?' \u2605':'')+' on Chain '+(idx+1)+'.');
+
+    if(move.card.kind==='op' && move.card.star && !isComplete(chain)){
+      const bonusCandidates = player.hand.filter(c=>c.kind==='number' && canPlayOnChain(c, chain) && !wouldDivideByZero(c, chain));
+      if(bonusCandidates.length){
+        let bestCard = null, bestScore = -Infinity;
+        for(const c of bonusCandidates){
+          const s = scoreCandidateMove(c, chain);
+          if(s > bestScore){ bestScore = s; bestCard = c; }
+        }
+        removeCardFromHand(bestCard.id);
+        applyCardToChain(bestCard, chain);
+        recordCardPlayed(bestCard);
+        log('<span class="'+playerColorClass(state.turn)+'">'+player.name+'</span> plays free number <b>'+bestCard.value+'</b> (bonus).');
+      }
+    }
+
+    maybeResolveChain(idx);
+    endTurn();
   }
 
   function endTurn(){
@@ -1265,6 +1649,7 @@
     render();
     if(!state.gameOver){
       maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      if(isAiTurn()) scheduleAiTurn();
     }
   }
 
@@ -1273,6 +1658,7 @@
     const penalty = applyTimeoutPenalty();
     log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time — turn forfeited'+(penalty ? ' — <span class="score">-'+penalty.toFixed(2)+' pts</span>' : '')+'.');
     selectedCardId = null;
+    pendingPlacement = null;
     endTurn();
   }
 
@@ -1283,6 +1669,48 @@
       clearShotClock();
       showGameOver(player);
     }
+  }
+
+  function buildStatBreakdown(){
+    const el = document.getElementById('over-stats');
+    const chains = matchStats.chains;
+    const rows = [];
+
+    if(chains.length === 0){
+      el.innerHTML = '<div class="stat-row"><span>No chains were completed this duel.</span></div>';
+      return;
+    }
+
+    // biggest chain
+    let biggest = chains[0];
+    for(const c of chains) if(c.value > biggest.value) biggest = c;
+    const biggestOwner = state.players[biggest.playerIdx].name;
+    rows.push(['Biggest chain', biggestOwner + ' — ' + biggest.value.toFixed(2) + ' (' + biggest.expr + ')']);
+
+    // most-used element (cards actually played, either player)
+    const ec = matchStats.elementCounts;
+    let topElement = 'sun';
+    for(const k of ['snow','sky']) if(ec[k] > ec[topElement]) topElement = k;
+    const elInfo = elFromKey(topElement);
+    rows.push(['Most-used element', elInfo.glyph + ' ' + elInfo.label + ' (' + ec[topElement] + ' cards played)']);
+
+    // average chain value
+    const avg = chains.reduce((s,c)=>s+c.value, 0) / chains.length;
+    rows.push(['Average chain value', avg.toFixed(2) + ' pts over ' + chains.length + ' chain' + (chains.length===1?'':'s')]);
+
+    // longest bracket expression
+    const bracketed = chains.filter(c=>c.hadBracket);
+    if(bracketed.length){
+      let longest = bracketed[0];
+      for(const c of bracketed) if(c.tokenCount > longest.tokenCount) longest = c;
+      rows.push(['Longest bracket chain', state.players[longest.playerIdx].name + ' — ' + longest.expr]);
+    } else {
+      rows.push(['Longest bracket chain', 'None played']);
+    }
+
+    el.innerHTML = rows.map(([label,val])=>
+      '<div class="stat-row"><span>'+label+'</span><b>'+val+'</b></div>'
+    ).join('');
   }
 
   function showGameOver(stuckPlayer){
@@ -1302,12 +1730,15 @@
     sub = stuckPlayer.name + ' has no legal move left — the duel ends.';
     document.getElementById('over-title').textContent = title;
     document.getElementById('over-sub').textContent = sub;
+    buildStatBreakdown();
     document.getElementById('overlay').classList.remove('hidden');
   }
 
   // ---------------- Setup wiring ----------------
   document.getElementById('start-btn').addEventListener('click', startGame);
   document.getElementById('deselect-btn').addEventListener('click', ()=>{ selectedCardId=null; render(); });
+  document.getElementById('confirm-placement-btn').addEventListener('click', commitPlacement);
+  document.getElementById('cancel-placement-btn').addEventListener('click', cancelPlacement);
   document.getElementById('skip-bonus').addEventListener('click', ()=>skipBonus('manual'));
   document.getElementById('restart-btn').addEventListener('click', ()=>{
     clearShotClock();
@@ -1323,6 +1754,24 @@
       timerEnabled = (btn.dataset.val === 'on');
       document.getElementById('timer-choice').classList.toggle('chips-disabled', !timerEnabled);
       document.getElementById('penalty-choice').classList.toggle('chips-disabled', !timerEnabled);
+    });
+  });
+
+  let selectedMode = 'pvp';
+  document.getElementById('mode-toggle').querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('mode-toggle').querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedMode = btn.dataset.val;
+      const p2input = document.getElementById('p2name');
+      const p2field = document.getElementById('p2-field');
+      if(selectedMode === 'ai'){
+        p2field.classList.add('chips-disabled');
+        p2input.value = 'AI Opponent';
+      } else {
+        p2field.classList.remove('chips-disabled');
+        if(p2input.value === 'AI Opponent') p2input.value = '';
+      }
     });
   });
 
@@ -1344,7 +1793,7 @@
 
   function startGame(){
     const p1name = document.getElementById('p1name').value.trim() || 'Player 1';
-    const p2name = document.getElementById('p2name').value.trim() || 'Player 2';
+    const p2name = selectedMode === 'ai' ? 'AI Opponent' : (document.getElementById('p2name').value.trim() || 'Player 2');
     const deck = shuffle(buildDeck());
     const handSize = Math.floor(deck.length / 2); // deal the max possible per player
 
@@ -1361,12 +1810,16 @@
       gameOver:false,
       timerEnabled: timerEnabled,
       turnSeconds: selectedTurnSeconds,
-      penalty: selectedPenalty
+      penalty: selectedPenalty,
+      mode: selectedMode,
+      aiPlayerIndex: selectedMode === 'ai' ? 1 : -1
     };
     selectedCardId = null;
+    pendingPlacement = null;
     bonusMode = false;
     bonusChainIndex = null;
-
+    resolveFlashes = {};
+    matchStats = freshMatchStats();
     document.getElementById('log').innerHTML = '';
     document.getElementById('setup-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
@@ -1377,7 +1830,12 @@
     checkGameOver();
     render();
     if(!state.gameOver){
-      maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      if(isAiTurn()){
+        maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+        scheduleAiTurn();
+      } else {
+        maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      }
     }
   }
 

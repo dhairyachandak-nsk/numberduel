@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How to Play — NUMBERDUEL</title>
+<meta name="description" content="Full rules for Numberduel — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="How to Play — Numberduel">
+<meta property="og:description" content="Full rules for Numberduel — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+<meta property="og:image" content="social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="How to Play — Numberduel">
+<meta name="twitter:image" content="social-preview.png">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0d;
+    --ink:#eeeef1;
+    --muted:#8b8b96;
+    --panel:#111116;
+    --panel-2:#17171d;
+    --line:#2a2a33;
+    --sun:#e8a13a;
+    --sun-dim:#7a5a26;
+    --snow:#8fa9f5;
+    --snow-dim:#41507f;
+    --sky:#54cbe0;
+    --sky-dim:#2b6570;
+    --gold:#e6c878;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse 900px 500px at 50% -10%, #16161d 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:720px;margin:0 auto;}
+
+  .meander{
+    height:14px; width:100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M0 14 V4 H8 V0 H20 V8 H12 V10 H24 V14' fill='none' stroke='%233a3a45' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat:repeat-x;
+    opacity:.9;
+    margin:18px 0;
+  }
+  .meander.accent{
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M0 14 V4 H8 V0 H20 V8 H12 V10 H24 V14' fill='none' stroke='%23e6c878' stroke-width='2'/%3E%3C/svg%3E");
+  }
+
+  header{text-align:center;margin-bottom:6px;}
+  .title-row{display:flex;align-items:center;justify-content:center;gap:16px;}
+  .title-sword{height:46px;width:auto;opacity:.92;filter:drop-shadow(0 0 8px rgba(230,200,120,.3));}
+  .title-sword.flipped{transform:scaleX(-1);}
+  h1{
+    font-family:'Cinzel',serif;
+    font-weight:900;
+    letter-spacing:.1em;
+    font-size:clamp(22px,4.4vw,32px);
+    margin:0;
+    background:linear-gradient(180deg,#fff, #b9b9c4 70%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .subtitle{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    margin-top:6px;
+  }
+
+  .back-link{
+    display:inline-block;
+    margin-top:16px;
+    font-family:'Cinzel',serif;
+    letter-spacing:.06em;
+    font-size:13px;
+    color:var(--gold);
+    text-decoration:none;
+    border:1px solid var(--gold);
+    padding:9px 20px;
+    border-radius:3px;
+    transition:background .12s ease, color .12s ease;
+  }
+  .back-link:hover{background:var(--gold); color:#1a1206;}
+  .back-wrap{text-align:center;}
+
+  .warning-box{
+    background:rgba(227,85,85,.06);
+    border:1px solid rgba(227,85,85,.4);
+    border-radius:4px;
+    padding:16px 18px;
+    margin:26px 0;
+  }
+  .warning-box .wt{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    font-size:11.5px;
+    color:#e37a7a;
+    margin-bottom:8px;
+  }
+  .warning-box p{margin:0; font-size:13px; line-height:1.7; color:var(--muted);}
+
+  .rules-body{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:8px 28px 20px;
+  }
+  .rules-body h4{
+    color:var(--gold);
+    font-family:'Cinzel',serif;
+    font-weight:700;
+    font-size:15px;
+    letter-spacing:.04em;
+    margin:26px 0 8px;
+    border-left:3px solid var(--gold);
+    padding-left:12px;
+  }
+  .rules-body h4:first-of-type{margin-top:22px;}
+  .rules-body p{margin:0 0 8px; font-size:14px; line-height:1.75; color:var(--ink);}
+  .rules-body code{
+    background:#000;
+    padding:1px 6px;
+    border-radius:3px;
+    color:var(--gold);
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+  }
+  .rules-body .sun-text{color:var(--sun);}
+  .rules-body .snow-text{color:var(--snow);}
+  .rules-body .sky-text{color:var(--sky);}
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:36px;
+    letter-spacing:.05em;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-row">
+      <img src="header-logo.png" class="title-sword" alt="">
+      <div>
+        <h1>HOW TO PLAY</h1>
+        <div class="subtitle">Numberduel &middot; Sun &middot; Snow &middot; Sky</div>
+      </div>
+      <img src="header-logo.png" class="title-sword flipped" alt="">
+    </div>
+    <div class="back-wrap">
+      <a class="back-link" href="index.html">&larr; Back to the game</a>
+    </div>
+  </header>
+
+  <div class="meander accent"></div>
+
+  <div class="warning-box">
+    <div class="wt">Warning</div>
+    <p>Turning on a turn timer opens the door to a strategic exploit: a player
+    stuck with no good move can simply let the clock run out on purpose instead
+    of playing a bad card, effectively "passing" for free. The time-out penalty
+    exists specifically to discourage this — every time-out, whether on a main
+    turn or a star-card bonus, docks that player points (scores can go
+    negative). Pick a penalty steep enough to make stalling not worth it, or
+    just leave the timer off entirely for relaxed, untimed play.</p>
+  </div>
+
+  <div class="rules-body">
+
+    <h4>The Deck</h4>
+    <p>57 cards total, split across 3 elements — <b class="sun-text">Sun</b>,
+    <b class="snow-text">Snow</b>, and <b class="sky-text">Sky</b>. Each element
+    has the same 19 cards: number cards <code>1</code>&ndash;<code>9</code>
+    (one of each), plus 10 operator cards — two each of <code>+</code>
+    <code>&minus;</code> <code>&times;</code>, and two each of <code>&divide;</code>
+    and bracket <code>{ }</code>. Every duel shuffles all 57 and deals the
+    biggest even split possible — 28 cards to each player, 1 left over unused.</p>
+
+    <h4>Chains</h4>
+    <p>The board has 3 open "chain" slots. A chain is a running math expression
+    built one card at a time. On your turn you play exactly one card, either
+    starting a brand-new chain in an empty slot, or adding to a chain that's
+    already in progress.</p>
+    <p><b>The single-element rule:</b> once a chain has its first card, every
+    later card added to it must be the same element. A Snow chain only ever
+    takes more Snow cards. This is also why the game feels like managing three
+    separate lanes — a Sun chain, a Snow chain, and a Sky chain can all be open
+    side by side.</p>
+
+    <h4>Opponent: 2 Players or AI</h4>
+    <p>Play locally against a friend, or switch to <b>vs AI</b> on the setup
+    screen for a single-player practice opponent. The AI always plays second,
+    its hand stays hidden (you'll just see face-down cards and a "Thinking…"
+    message), and it plays via a simple greedy heuristic — it's a reasonable
+    practice partner, not an unbeatable one.</p>
+
+    <h4>What Counts as a Legal Play</h4>
+    <p>Think of a chain as a sentence that has to stay grammatically valid:</p>
+    <p>&bull; A chain must <i>start</i> with a number or an opening bracket.<br>
+    &bull; A number can only follow an operator or an opening bracket (you can't
+    play two numbers in a row).<br>
+    &bull; An operator (<code>+ &minus; &times; &divide;</code>) can only follow
+    a number or a closed bracket (you can't play two operators in a row).</p>
+
+    <h4>Confirming a Play</h4>
+    <p>Selecting a card and clicking a chain doesn't commit it right away —
+    you'll see a ghost preview of the card in that slot plus Confirm/Cancel
+    buttons, so a misclick can't lock in a move you didn't mean to make. The
+    turn timer, if it's on, keeps running the whole time.</p>
+
+    <h4>Brackets Self-Close</h4>
+    <p>There's only one bracket card, and you never "close" it yourself — a
+    bracket automatically snaps shut the instant the expression inside it becomes
+    a computable result on its own. Example: play <code>{</code>, then
+    <code>2</code>, then <code>+</code>, then <code>3</code> — the moment that
+    <code>3</code> lands, the bracket closes itself into <code>(2+3)</code>
+    automatically, worth 5 as a single value in the outer chain.</p>
+
+    <h4>Finishing a Chain</h4>
+    <p>A chain scores and clears the instant it becomes a complete, computable
+    expression — but a single lone number by itself does <i>not</i> count. You
+    need at least one full operation (a number, an operator, and another number)
+    before a chain can resolve. Whoever plays the card that completes it scores
+    the result, rounded to two decimal places, and the slot opens back up for a
+    new chain.</p>
+
+    <h4>Star Cards (★)</h4>
+    <p>One <code>&divide;</code> and one <code>&minus;</code> per element are
+    marked with a star. Playing a star card doesn't end your turn — you
+    immediately get a free follow-up play of a number card onto that same chain,
+    no extra turn needed. If the turn timer is on, that bonus play always runs
+    on its own fixed 15-second clock, separate from your main turn timer.</p>
+
+    <h4>Dividing by Zero</h4>
+    <p>Not allowed. If a <code>&divide;</code> card is on top of a chain, you
+    can't play a <code>0</code> right after it — the game will simply block the
+    move.</p>
+
+    <h4>Turn Timer (Optional)</h4>
+    <p>Off by default — Numberduel is untimed unless you turn this on. Switch it
+    on and pick 15, 30, 45, or 60 seconds per turn; let the clock hit zero and
+    your turn is forfeited to your opponent, no card played. You also pick a
+    time-out penalty (&minus;5, &minus;10, &minus;15, or &minus;30 points),
+    deducted from whoever let the clock run out — on either a main turn or a
+    star-card bonus — specifically to discourage stalling on purpose to dodge a
+    bad position. See the warning above for more on that.</p>
+
+    <h4>End of the Duel</h4>
+    <p>The game ends the moment it becomes a player's turn and they have no
+    legal move anywhere — no card in hand fits any open chain, and no card can
+    start a new one (or all 3 slots are already full of chains they can't
+    extend). Scores are tallied (penalties and all) and whoever has more points
+    wins — along with a quick breakdown of the match's biggest chain, most-used
+    element, average chain value, and longest bracket expression.</p>
+
+  </div>
+
+  <div class="back-wrap" style="margin-top:28px;">
+    <a class="back-link" href="index.html">&larr; Back to the game</a>
+  </div>
+
+  <footer>Created for the betterment of mathematics by Dhairya Chandak — you're welcome, world.</footer>
+</div>
+</body>
+</html>
