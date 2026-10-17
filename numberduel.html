@@ -1,0 +1,2026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NUMBERDUEL</title>
+<meta name="description" content="A duel of chains and numbers — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+
+<!-- Open Graph / social preview. Note: og:image is a relative path — for full
+     compatibility with every platform (some require an absolute URL), replace
+     these three "og:*" and "twitter:image" hrefs with your full GitHub Pages
+     URL once the site is live, e.g. https://<username>.github.io/numberduel/social-preview.png -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Numberduel">
+<meta property="og:description" content="A duel of chains and numbers — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+<meta property="og:image" content="social-preview.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Numberduel">
+<meta name="twitter:description" content="A duel of chains and numbers — build math expressions across Sun, Snow, and Sky in this 2-player card game.">
+<meta name="twitter:image" content="social-preview.png">
+
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="favicon-16.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0a0d;
+    --ink:#eeeef1;
+    --muted:#8b8b96;
+    --panel:#111116;
+    --panel-2:#17171d;
+    --line:#2a2a33;
+    --sun:#e8a13a;
+    --sun-dim:#7a5a26;
+    --snow:#8fa9f5;
+    --snow-dim:#41507f;
+    --sky:#54cbe0;
+    --sky-dim:#2b6570;
+    --gold:#e6c878;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 900px 500px at 50% -10%, #16161d 0%, var(--bg) 60%);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    padding:28px 16px 60px;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  /* ---- Greek key border, drawn as repeating SVG background ---- */
+  .meander{
+    height:14px;
+    width:100%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M0 14 V4 H8 V0 H20 V8 H12 V10 H24 V14' fill='none' stroke='%233a3a45' stroke-width='2'/%3E%3C/svg%3E");
+    background-repeat:repeat-x;
+    opacity:.9;
+    margin:18px 0;
+  }
+  .meander.accent{
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'%3E%3Cpath d='M0 14 V4 H8 V0 H20 V8 H12 V10 H24 V14' fill='none' stroke='%23e6c878' stroke-width='2'/%3E%3C/svg%3E");
+  }
+
+  header{text-align:center;margin-bottom:6px;}
+  .title-row{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:22px;
+  }
+  .title-sword{
+    height:60px;
+    width:auto;
+    opacity:.92;
+    filter:drop-shadow(0 0 8px rgba(230,200,120,.3));
+    flex-shrink:0;
+  }
+  .title-sword.flipped{transform:scaleX(-1);}
+  h1{
+    font-family:'Cinzel',serif;
+    font-weight:900;
+    letter-spacing:.14em;
+    font-size:clamp(28px,5vw,44px);
+    margin:0;
+    background:linear-gradient(180deg,#fff, #b9b9c4 70%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  header .tag{
+    font-family:'JetBrains Mono',monospace;
+    color:var(--muted);
+    font-size:12px;
+    letter-spacing:.2em;
+    text-transform:uppercase;
+    margin-top:4px;
+  }
+
+  .hidden{display:none !important;}
+
+  /* ---------- Setup screen ---------- */
+  .setup-card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:32px;
+    max-width:560px;
+    margin:24px auto;
+  }
+  .setup-card h2{
+    font-family:'Cinzel',serif;
+    font-size:18px;
+    letter-spacing:.08em;
+    margin:0 0 18px;
+    color:var(--gold);
+  }
+  .field{margin-bottom:20px;}
+  .field label{
+    display:block;
+    font-size:12px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  .field input[type=text]{
+    width:100%;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--ink);
+    padding:10px 12px;
+    border-radius:3px;
+    font-family:'Inter',sans-serif;
+    font-size:14px;
+  }
+  .field input[type=text]:focus{outline:2px solid var(--gold); outline-offset:1px;}
+  .btn{
+    font-family:'Cinzel',serif;
+    letter-spacing:.08em;
+    background:var(--gold);
+    color:#1a1206;
+    border:none;
+    padding:12px 26px;
+    border-radius:3px;
+    font-size:14px;
+    font-weight:700;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease;
+    touch-action:manipulation;
+  }
+  .btn:hover{transform:translateY(-1px); box-shadow:0 4px 14px rgba(230,200,120,.25);}
+  .btn:active{transform:translateY(0);}
+  .btn.ghost{
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--ink);
+  }
+  .btn.small{padding:6px 14px;font-size:12px;}
+  .btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+
+  .rules-dropdown{
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    margin-bottom:22px;
+    overflow:hidden;
+  }
+  .rules-dropdown summary{
+    cursor:pointer;
+    padding:13px 16px;
+    font-family:'Cinzel',serif;
+    letter-spacing:.08em;
+    color:var(--gold);
+    font-size:13px;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    user-select:none;
+  }
+  .rules-dropdown summary::-webkit-details-marker{display:none;}
+  .rules-dropdown summary .chev{
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    transition:transform .15s ease;
+    color:var(--muted);
+  }
+  .rules-dropdown[open] summary .chev{transform:rotate(45deg);}
+  .rules-dropdown summary:hover{color:#f2dda0;}
+  .rules-body{
+    padding:2px 18px 18px;
+    font-size:12.5px;
+    line-height:1.65;
+    color:var(--muted);
+    border-top:1px solid var(--line);
+  }
+  .rules-body h4{
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    font-size:11.5px;
+    text-transform:uppercase;
+    letter-spacing:.08em;
+    margin:16px 0 6px;
+    border-left:2px solid var(--gold);
+    padding-left:8px;
+  }
+  .rules-body h4:first-of-type{margin-top:14px;}
+  .rules-body p{margin:0 0 8px;}
+  .rules-body code{
+    background:#000;
+    padding:1px 5px;
+    border-radius:3px;
+    color:var(--gold);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+  }
+  .rules-body .sun-text{color:var(--sun);}
+  .rules-body .snow-text{color:var(--snow);}
+  .rules-body .sky-text{color:var(--sky);}
+
+  /* ---------- Scoreboard ---------- */
+  .scoreboard{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:6px;
+  }
+  .plaque{
+    flex:1;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px 18px;
+    position:relative;
+  }
+  .plaque.active{
+    border-color:var(--gold);
+    box-shadow:0 0 0 1px var(--gold), 0 0 22px rgba(230,200,120,.15);
+  }
+  .plaque .pname{
+    font-family:'Cinzel',serif;
+    font-size:14px;
+    letter-spacing:.06em;
+    color:var(--ink);
+  }
+  .plaque .pturn{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    color:var(--gold);
+    text-transform:uppercase;
+    letter-spacing:.15em;
+    height:14px;
+  }
+  .plaque .pscore{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:26px;
+    margin-top:4px;
+  }
+  .vs{
+    font-family:'Cinzel',serif;
+    color:var(--muted);
+    font-size:13px;
+    letter-spacing:.2em;
+  }
+
+  .timer-choice{display:flex; gap:8px;}
+  .chip{
+    flex:1;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    color:var(--muted);
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:13px;
+    padding:9px 0;
+    border-radius:3px;
+    cursor:pointer;
+    transition:border-color .12s ease, color .12s ease, opacity .12s ease;
+  }
+  .chip:hover{color:var(--ink); border-color:var(--gold);}
+  .chip.selected{
+    color:#1a1206;
+    background:var(--gold);
+    border-color:var(--gold);
+  }
+  .timer-sub{margin-top:-8px;}
+  .chips-disabled{
+    opacity:.35;
+    pointer-events:none;
+  }
+  .chips-disabled .chip:hover{color:var(--muted); border-color:var(--line);}
+
+  .warning-dropdown{
+    background:rgba(227,85,85,.06);
+    border:1px solid rgba(227,85,85,.4);
+    border-radius:4px;
+    margin-bottom:22px;
+    overflow:hidden;
+  }
+  .warning-dropdown summary{
+    cursor:pointer;
+    padding:11px 16px;
+    font-family:'Inter',sans-serif;
+    font-weight:700;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    font-size:11.5px;
+    color:#e37a7a;
+    list-style:none;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    user-select:none;
+  }
+  .warning-dropdown summary::-webkit-details-marker{display:none;}
+  .warning-dropdown summary .chev{
+    font-weight:700;
+    font-size:16px;
+    transition:transform .15s ease;
+    color:#e37a7a;
+  }
+  .warning-dropdown[open] summary .chev{transform:rotate(45deg);}
+  .warning-body{
+    padding:0 16px 14px;
+    font-size:12px;
+    line-height:1.6;
+    color:var(--muted);
+    border-top:1px solid rgba(227,85,85,.25);
+  }
+  .warning-body p{margin:10px 0 0;}
+
+  .shot-clock{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    min-width:78px;
+  }
+  .shot-clock .clock-label{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--muted);
+  }
+  .shot-clock .clock-num{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:28px;
+    color:var(--gold);
+    line-height:1.1;
+    transition:color .15s ease;
+  }
+  .shot-clock .clock-num.warn{color:#e37a3a;}
+  .shot-clock .clock-num.danger{color:#e35555; animation:tickpulse 1s infinite;}
+  @keyframes tickpulse{
+    0%,100%{transform:scale(1);}
+    50%{transform:scale(1.12);}
+  }
+
+  /* ---------- Board ---------- */
+  .board{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:14px;
+    margin:20px 0 10px;
+  }
+  .chain-slot{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:4px;
+    min-height:150px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    cursor:default;
+    transition:box-shadow .15s ease, border-color .15s ease;
+  }
+  .chain-slot.selectable{
+    cursor:pointer;
+    border-color:var(--gold);
+    touch-action:manipulation;
+  }
+  .chain-slot.selectable:hover{
+    box-shadow:0 0 0 1px var(--gold), 0 0 18px rgba(230,200,120,.18);
+  }
+  .chain-slot.pending{
+    border-color:var(--gold);
+    box-shadow:0 0 0 2px var(--gold), 0 0 26px rgba(230,200,120,.35);
+    animation:pendingPulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pendingPulse{
+    0%,100%{ box-shadow:0 0 0 2px var(--gold), 0 0 20px rgba(230,200,120,.25); }
+    50%{ box-shadow:0 0 0 2px var(--gold), 0 0 32px rgba(230,200,120,.5); }
+  }
+  .chain-expr .tok.ghost{ opacity:.45; }
+  .chain-expr .tok.resolved-value{
+    color:var(--gold);
+    font-weight:700;
+    margin-left:2px;
+  }
+  .chain-expr.resolved{
+    animation: resolveCollapse 0.9s ease-out forwards;
+  }
+  @keyframes resolveCollapse{
+    0%{ opacity:1; transform:scale(1); }
+    45%{ opacity:1; transform:scale(1.08); }
+    100%{ opacity:0; transform:scale(0.82); }
+  }
+  .chain-slot.resolved-flash{
+    animation: resolveFlash 0.9s ease-out forwards;
+  }
+  @keyframes resolveFlash{
+    0%{ box-shadow:0 0 0 2px var(--gold), 0 0 40px rgba(230,200,120,.55); background:rgba(230,200,120,.10); }
+    100%{ box-shadow:none; background:transparent; }
+  }
+  .chain-slot .slot-head{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.14em;
+    color:var(--muted);
+    margin-bottom:10px;
+  }
+  .elem-tag{
+    font-weight:700;
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:10px;
+  }
+  .elem-tag.sun{color:var(--sun); border:1px solid var(--sun-dim); background:rgba(232,161,58,.08);}
+  .elem-tag.snow{color:var(--snow); border:1px solid var(--snow-dim); background:rgba(143,169,245,.08);}
+  .elem-tag.sky{color:var(--sky); border:1px solid var(--sky-dim); background:rgba(84,203,224,.08);}
+
+  .chain-empty{
+    flex:1;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:var(--muted);
+    font-size:12px;
+    font-style:italic;
+    text-align:center;
+    padding:8px;
+  }
+  .chain-expr{
+    flex:1;
+    display:flex;
+    align-items:center;
+    font-family:'JetBrains Mono',monospace;
+    font-size:22px;
+    font-weight:700;
+    flex-wrap:wrap;
+    gap:3px;
+    letter-spacing:.02em;
+  }
+  .chain-expr .tok{
+    padding:2px 3px;
+  }
+  .chain-expr .tok.op{color:var(--gold);}
+  .chain-expr .tok.br{color:var(--muted);}
+
+  .flash{
+    animation:flashpop .9s ease;
+  }
+  @keyframes flashpop{
+    0%{ box-shadow:0 0 0 2px var(--gold), 0 0 30px rgba(230,200,120,.5); }
+    100%{ box-shadow:none; }
+  }
+
+  /* ---------- Hand ---------- */
+  .hand-wrap{margin-top:24px;}
+  .hand-label{
+    font-family:'Cinzel',serif;
+    font-size:13px;
+    letter-spacing:.1em;
+    color:var(--gold);
+    margin-bottom:10px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .hand{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+  }
+  .card{
+    width:56px;
+    height:76px;
+    border-radius:6px;
+    background:#000;
+    border:1.5px solid var(--line);
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    position:relative;
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:20px;
+    transition:transform .1s ease, border-color .1s ease;
+    user-select:none;
+    touch-action:manipulation;
+  }
+  .card:hover{transform:translateY(-4px);}
+  .card.sun{color:var(--sun); border-color:var(--sun-dim);}
+  .card.snow{color:var(--snow); border-color:var(--snow-dim);}
+  .card.sky{color:var(--sky); border-color:var(--sky-dim);}
+  .card.selected{
+    border-color:var(--gold) !important;
+    box-shadow:0 0 0 2px var(--gold), 0 6px 18px rgba(230,200,120,.3);
+    transform:translateY(-6px);
+  }
+  .card.disabled{opacity:.28; cursor:not-allowed; transform:none;}
+  .card.ai-card-back{
+    cursor:default;
+    background:repeating-linear-gradient(135deg, #17171d 0px, #17171d 6px, #101014 6px, #101014 12px);
+    border-color:var(--line);
+  }
+  .card.ai-card-back:hover{ transform:none; }
+  .board.ai-turn-lock .chain-slot{ opacity:.75; }
+  .card .star{
+    position:absolute;
+    top:3px; right:4px;
+    font-size:9px;
+    color:var(--gold);
+  }
+  .card .elabel{
+    position:absolute;
+    bottom:3px; left:5px;
+    font-size:7px;
+    letter-spacing:.06em;
+    color:var(--muted);
+    font-family:'Inter',sans-serif;
+    text-transform:uppercase;
+  }
+
+  .controls-row{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    margin-top:14px;
+  }
+  .hint{
+    font-size:12px;
+    color:var(--muted);
+    font-family:'Inter',sans-serif;
+  }
+
+  /* ---------- Log ---------- */
+  .log{
+    margin-top:26px;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:12px 16px;
+    max-height:150px;
+    overflow-y:auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--muted);
+    line-height:1.7;
+  }
+  .log div span.pl1{color:var(--snow);}
+  .log div span.pl2{color:var(--sun);}
+  .log div span.score{color:var(--gold); font-weight:700;}
+
+  /* ---------- Bonus banner ---------- */
+  .bonus-banner{
+    background:linear-gradient(90deg, rgba(230,200,120,.14), transparent);
+    border:1px solid var(--gold);
+    border-radius:4px;
+    padding:10px 16px;
+    margin:14px 0;
+    font-family:'Inter',sans-serif;
+    font-size:13px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+
+  /* ---------- Game over ---------- */
+  .overlay{
+    position:fixed; inset:0;
+    background:rgba(5,5,7,.85);
+    display:flex; align-items:center; justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .over-card{
+    background:var(--panel);
+    border:1px solid var(--gold);
+    border-radius:6px;
+    padding:40px;
+    text-align:center;
+    max-width:420px;
+    box-shadow:0 0 60px rgba(230,200,120,.15);
+  }
+  .over-card h2{
+    font-family:'Cinzel',serif;
+    font-size:26px;
+    letter-spacing:.08em;
+    color:var(--gold);
+    margin:0 0 4px;
+  }
+  .over-card .sub{color:var(--muted); font-size:13px; margin-bottom:20px;}
+  .over-score{
+    display:flex; justify-content:center; gap:36px; margin-bottom:26px;
+  }
+  .over-score div{font-family:'JetBrains Mono',monospace;}
+  .over-score .num{font-size:30px; font-weight:700;}
+
+  .over-stats{
+    text-align:left;
+    background:var(--panel-2);
+    border:1px solid var(--line);
+    border-radius:4px;
+    padding:14px 18px;
+    margin-bottom:24px;
+    font-size:12.5px;
+    line-height:1.9;
+  }
+  .over-stats .stat-row{
+    display:flex;
+    justify-content:space-between;
+    gap:12px;
+    color:var(--muted);
+  }
+  .over-stats .stat-row b{
+    color:var(--ink);
+    font-weight:600;
+    text-align:right;
+  }
+  .over-stats .stat-row + .stat-row{
+    border-top:1px solid var(--line);
+    padding-top:6px;
+    margin-top:2px;
+  }
+
+  footer{
+    text-align:center;
+    color:var(--muted);
+    font-size:11px;
+    margin-top:36px;
+    letter-spacing:.05em;
+  }
+
+  @media (max-width:720px){
+    .board{grid-template-columns:1fr;}
+    .scoreboard{flex-direction:column;}
+    .title-sword{height:34px;}
+
+    /* Dense hands (up to 28 cards) become a swipeable strip instead of
+       wrapping into many rows — far easier to browse with a thumb. */
+    .hand{
+      flex-wrap:nowrap;
+      overflow-x:auto;
+      overflow-y:visible;
+      scroll-snap-type:x proximity;
+      -webkit-overflow-scrolling:touch;
+      gap:10px;
+      padding:6px 4px 14px;
+      margin:0 -4px;
+    }
+    .card{
+      flex-shrink:0;
+      scroll-snap-align:start;
+      width:62px;
+      height:84px;
+      font-size:22px;
+    }
+    .card:hover{ transform:none; } /* avoid sticky-hover lift on touch devices */
+    .card.selected{ transform:translateY(-4px); }
+
+    .controls-row{ flex-wrap:wrap; }
+    .btn.small{ padding:9px 16px; font-size:13px; }
+  }
+  @media (max-width:480px){
+    .title-sword{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="title-row">
+      <img src="header-logo.png" class="title-sword" alt="">
+      <div class="title-text">
+        <h1>NUMBERDUEL</h1>
+        <div class="tag">Sun &middot; Snow &middot; Sky — a duel of chains and numbers</div>
+      </div>
+      <img src="header-logo.png" class="title-sword flipped" alt="">
+    </div>
+  </header>
+  <div class="meander"></div>
+
+  <!-- ============ SETUP ============ -->
+  <div id="setup-screen">
+    <div class="setup-card">
+      <h2>Begin the Duel</h2>
+      <div class="field">
+        <label>Opponent</label>
+        <div class="timer-choice" id="mode-toggle">
+          <button type="button" class="chip selected" data-val="pvp">2 Players</button>
+          <button type="button" class="chip" data-val="ai">vs AI</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>Duelist One</label>
+        <input type="text" id="p1name" placeholder="Player 1" maxlength="16">
+      </div>
+      <div class="field" id="p2-field">
+        <label>Duelist Two</label>
+        <input type="text" id="p2name" placeholder="Player 2" maxlength="16">
+      </div>
+      <details class="rules-dropdown">
+        <summary>How to Play <span class="chev">+</span></summary>
+        <div class="rules-body">
+
+          <h4>The Deck</h4>
+          <p>57 cards total, split across 3 elements — <b class="sun-text">Sun</b>,
+          <b class="snow-text">Snow</b>, and <b class="sky-text">Sky</b>. Each element
+          has the same 19 cards: number cards <code>1</code>&ndash;<code>9</code>
+          (one of each), plus 10 operator cards — two each of <code>+</code>
+          <code>&minus;</code> <code>&times;</code>, and two each of <code>&divide;</code>
+          and bracket <code>{ }</code>. Every duel shuffles all 57 and deals the
+          biggest even split possible — 28 cards to each player, 1 left over unused.</p>
+
+          <h4>Chains</h4>
+          <p>The board has 3 open "chain" slots. A chain is a running math expression
+          built one card at a time. On your turn you play exactly one card, either
+          starting a brand-new chain in an empty slot, or adding to a chain that's
+          already in progress.</p>
+          <p><b>The single-element rule:</b> once a chain has its first card, every
+          later card added to it must be the same element. A Snow chain only ever
+          takes more Snow cards. This is also why the game feels like managing three
+          separate lanes — a Sun chain, a Snow chain, and a Sky chain can all be open
+          side by side.</p>
+
+          <h4>Opponent: 2 Players or AI</h4>
+          <p>Play locally against a friend, or switch to <b>vs AI</b> on the setup
+          screen for a single-player practice opponent. The AI always plays second,
+          its hand stays hidden (you'll just see face-down cards and a "Thinking…"
+          message). Pick <b>Easy</b> for a casual opponent that just grabs the best
+          move available right now, or <b>Hard</b> for one that looks several moves
+          ahead and guesses at your hidden hand from the cards it hasn't seen yet
+          — it never peeks at your cards, but expect a tough fight.</p>
+
+          <h4>What Counts as a Legal Play</h4>
+          <p>Think of a chain as a sentence that has to stay grammatically valid:</p>
+          <p>&bull; A chain must <i>start</i> with a number or an opening bracket.<br>
+          &bull; A number can only follow an operator or an opening bracket (you can't
+          play two numbers in a row).<br>
+          &bull; An operator (<code>+ &minus; &times; &divide;</code>) can only follow
+          a number or a closed bracket (you can't play two operators in a row).</p>
+
+          <h4>Confirming a Play</h4>
+          <p>Selecting a card and clicking a chain doesn't commit it right away —
+          you'll see a ghost preview of the card in that slot plus Confirm/Cancel
+          buttons, so a misclick can't lock in a move you didn't mean to make. The
+          turn timer, if it's on, keeps running the whole time.</p>
+
+          <h4>Brackets Self-Close</h4>
+          <p>There's only one bracket card, and you never "close" it yourself — a
+          bracket automatically snaps shut the instant the expression inside it becomes
+          a computable result on its own. Example: play <code>{</code>, then
+          <code>2</code>, then <code>+</code>, then <code>3</code> — the moment that
+          <code>3</code> lands, the bracket closes itself into <code>(2+3)</code>
+          automatically, worth 5 as a single value in the outer chain.</p>
+
+          <h4>Finishing a Chain</h4>
+          <p>A chain scores and clears the instant it becomes a complete, computable
+          expression — but a single lone number by itself does <i>not</i> count. You
+          need at least one full operation (a number, an operator, and another number)
+          before a chain can resolve. Whoever plays the card that completes it scores
+          the result, rounded to two decimal places, and the slot opens back up for a
+          new chain.</p>
+
+          <h4>Star Cards (★)</h4>
+          <p>One <code>&divide;</code> and one <code>&minus;</code> per element are
+          marked with a star. Playing a star card doesn't end your turn — you
+          immediately get a free follow-up play of a number card onto that same chain,
+          no extra turn needed. If the turn timer is on, that bonus play always runs
+          on its own fixed 15-second clock, separate from your main turn timer.</p>
+
+          <h4>Dividing by Zero</h4>
+          <p>Not allowed. If a <code>&divide;</code> card is on top of a chain, you
+          can't play a <code>0</code> right after it — the game will simply block the
+          move.</p>
+
+          <h4>Turn Timer (Optional)</h4>
+          <p>Off by default — Numberduel is untimed unless you turn this on. Switch it
+          on and pick 15, 30, 45, or 60 seconds per turn; let the clock hit zero and
+          your turn is forfeited to your opponent, no card played. You also pick a
+          time-out penalty (&minus;5, &minus;10, &minus;15, or &minus;30 points),
+          deducted from whoever let the clock run out — on either a main turn or a
+          star-card bonus — specifically to discourage stalling on purpose to dodge a
+          bad position. See the Warning note under the timer settings for more on that.</p>
+
+          <h4>End of the Duel</h4>
+          <p>The game ends the moment it becomes a player's turn and they have no
+          legal move anywhere — no card in hand fits any open chain, and no card can
+          start a new one (or all 3 slots are already full of chains they can't
+          extend). Scores are tallied (penalties and all) and whoever has more points
+          wins — along with a quick breakdown of the match's biggest chain, most-used
+          element, average chain value, and longest bracket expression.</p>
+
+        </div>
+      </details>
+      <div style="text-align:center; margin:-6px 0 22px;">
+        <a href="rules.html" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--muted);">Open full rules as a shareable page &#8599;</a>
+      </div>
+
+      <div class="field">        <label>Turn Timer</label>
+        <div class="timer-choice" id="timer-toggle">
+          <button type="button" class="chip selected" data-val="off">Off</button>
+          <button type="button" class="chip" data-val="on">On</button>
+        </div>
+      </div>
+      <div class="field timer-sub" id="difficulty-field">
+        <label>AI Difficulty</label>
+        <div class="timer-choice chips-disabled" id="difficulty-choice">
+          <button type="button" class="chip" data-val="easy">Easy</button>
+          <button type="button" class="chip selected" data-val="hard">Hard</button>
+        </div>
+      </div>
+
+      <div class="field timer-sub" id="seconds-field">
+        <label>Seconds Per Turn</label>
+        <div class="timer-choice chips-disabled" id="timer-choice">
+          <button type="button" class="chip" data-val="15">15s</button>
+          <button type="button" class="chip selected" data-val="30">30s</button>
+          <button type="button" class="chip" data-val="45">45s</button>
+          <button type="button" class="chip" data-val="60">60s</button>
+        </div>
+      </div>
+
+      <div class="field timer-sub" id="penalty-field">
+        <label>Time-Out Penalty</label>
+        <div class="timer-choice chips-disabled" id="penalty-choice">
+          <button type="button" class="chip" data-val="5">-5</button>
+          <button type="button" class="chip selected" data-val="10">-10</button>
+          <button type="button" class="chip" data-val="15">-15</button>
+          <button type="button" class="chip" data-val="30">-30</button>
+        </div>
+      </div>
+
+      <details class="warning-dropdown">
+        <summary>Warning <span class="chev">+</span></summary>
+        <div class="warning-body">
+          <p>Turning on a turn timer opens the door to a strategic exploit: a player
+          stuck with no good move can simply let the clock run out on purpose instead
+          of playing a bad card, effectively "passing" for free. The time-out penalty
+          above exists specifically to discourage this — every time-out, whether on a
+          main turn or a star-card bonus, docks that player points (scores can go
+          negative). Pick a penalty steep enough to make stalling not worth it, or
+          just leave the timer off entirely for relaxed, untimed play.</p>
+        </div>
+      </details>
+
+      <button class="btn" id="start-btn">Deal &amp; Begin</button>
+    </div>
+  </div>
+
+  <!-- ============ GAME ============ -->
+  <div id="game-screen" class="hidden">
+
+    <div class="scoreboard">
+      <div class="plaque" id="plaque0">
+        <div class="pname" id="pname0"></div>
+        <div class="pturn" id="pturn0"></div>
+        <div class="pscore" id="pscore0">0.00</div>
+      </div>
+      <div class="shot-clock" id="shot-clock">
+        <div class="clock-label" id="clock-label">Turn</div>
+        <div class="clock-num" id="clock-num">30</div>
+      </div>
+      <div class="plaque" id="plaque1">
+        <div class="pname" id="pname1"></div>
+        <div class="pturn" id="pturn1"></div>
+        <div class="pscore" id="pscore1">0.00</div>
+      </div>
+    </div>
+
+
+    <div class="meander accent"></div>
+
+    <div id="bonus-banner" class="bonus-banner hidden">
+      <span>★ Star bonus — play a number card now, or skip.</span>
+      <button class="btn small ghost" id="skip-bonus">Skip Bonus</button>
+    </div>
+
+    <div class="board" id="board"></div>
+
+    <div class="hand-wrap">
+      <div class="hand-label">
+        <span id="hand-owner">Hand</span>
+        <span class="hint" id="hand-hint">Select a card, then a chain.</span>
+      </div>
+      <div class="hand" id="hand"></div>
+      <div class="controls-row" id="controls-row">
+        <button class="btn ghost small" id="deselect-btn">Deselect</button>
+        <button class="btn small hidden" id="confirm-placement-btn">Confirm Play</button>
+        <button class="btn ghost small hidden" id="cancel-placement-btn">Cancel</button>
+      </div>
+    </div>
+
+    <div class="log" id="log"></div>
+  </div>
+
+  <footer>Created for the betterment of mathematics by Dhairya Chandak — you're welcome, world.</footer>
+</div>
+
+<div id="overlay" class="overlay hidden">
+  <div class="over-card">
+    <h2 id="over-title">Game Over</h2>
+    <div class="sub" id="over-sub"></div>
+    <div class="over-score">
+      <div><div id="over-n0" class="num">0</div><div id="over-l0"></div></div>
+      <div><div id="over-n1" class="num">0</div><div id="over-l1"></div></div>
+    </div>
+    <div class="over-stats" id="over-stats"></div>
+    <button class="btn" id="restart-btn">Duel Again</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const ELEMENTS = [
+    {key:'sun', label:'Sun', glyph:'\u2600'},
+    {key:'snow', label:'Snow', glyph:'\u2744'},
+    {key:'sky', label:'Sky', glyph:'\u2601'}
+  ];
+  const OP_SYMBOL = {'+':'+','-':'\u2212','*':'\u00D7','/':'\u00F7'};
+
+  let uidCounter = 1;
+  function uid(){ return 'c'+(uidCounter++); }
+
+  function buildDeck(){
+    let deck = [];
+    ELEMENTS.forEach(el=>{
+      for(let n=1;n<=9;n++){
+        deck.push({id:uid(), element:el.key, kind:'number', value:n});
+      }
+      const ops = [
+        ['+',false], ['+',false],
+        ['-',false], ['-',true],
+        ['*',false], ['*',false],
+        ['/',false], ['/',true],
+        ['{}',false], ['{}',false]
+      ];
+      ops.forEach(([op,star])=>{
+        deck.push({id:uid(), element:el.key, kind:'op', op, star});
+      });
+    });
+    return deck;
+  }
+
+  function shuffle(arr){
+    const a = arr.slice();
+    for(let i=a.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [a[i],a[j]] = [a[j],a[i]];
+    }
+    return a;
+  }
+
+  // ---------------- Game State ----------------
+  let state = null;
+
+  // A chain is a stack of "frames" — the root frame is the chain itself, and every
+  // {} card opens a new frame nested inside the current one. A frame never needs a
+  // closing card: the instant its own contents become a computable result (i.e. it
+  // has taken at least one operator and ended on a value), it self-closes and
+  // collapses into a single value inside its parent frame. The root frame collapsing
+  // the same way is what completes — and scores — the whole chain.
+  function newFrame(){
+    return { expectValue:true, opCount:0, pendingDivide:false };
+  }
+
+  function newChain(){
+    return { element:null, tokens:[], display:[], frames:[newFrame()] };
+  }
+
+  function currentFrame(chain){
+    return chain.frames[chain.frames.length - 1];
+  }
+
+  function activeChainCount(){
+    return state.chains.filter(c=>c!==null).length;
+  }
+
+  function canPlayOnChain(card, chain){
+    let expectValue;
+    if(chain === null){
+      expectValue = true;
+    } else {
+      if(card.element !== chain.element) return false;
+      expectValue = currentFrame(chain).expectValue;
+    }
+    if(card.kind === 'number'){
+      return expectValue === true;
+    }
+    if(card.kind === 'op'){
+      if(card.op === '{}'){
+        return expectValue === true;        // {} only ever opens a new frame now
+      }
+      return expectValue === false;         // +, -, *, /
+    }
+    return false;
+  }
+
+  function wouldDivideByZero(card, chain){
+    if(!chain) return false;
+    const f = currentFrame(chain);
+    return f.pendingDivide && card.kind === 'number' && card.value === 0;
+  }
+
+  function applyCardToChain(card, chain){
+    const frame = currentFrame(chain);
+    if(card.kind === 'number'){
+      chain.tokens.push(String(card.value));
+      chain.display.push({sym:String(card.value), kind:'num'});
+      frame.expectValue = false; frame.pendingDivide = false;
+    } else if(card.op === '{}'){
+      chain.tokens.push('(');
+      chain.display.push({sym:'(', kind:'br'});
+      chain.frames.push(newFrame());
+    } else { // + - * /
+      chain.tokens.push(card.op);
+      chain.display.push({sym:OP_SYMBOL[card.op], kind:'op'});
+      frame.expectValue = true;
+      frame.opCount++;
+      frame.pendingDivide = (card.op === '/');
+    }
+    autoCloseFrames(chain);
+  }
+
+  // Collapse any nested frame(s) that have become computable, cascading outward.
+  // Never pops the root frame — that's chain completion, handled by isComplete().
+  function autoCloseFrames(chain){
+    while(chain.frames.length > 1){
+      const f = chain.frames[chain.frames.length - 1];
+      if(f.expectValue === false && f.opCount >= 1){
+        chain.tokens.push(')');
+        chain.display.push({sym:')', kind:'br'});
+        chain.frames.pop();
+        const outer = currentFrame(chain);
+        outer.expectValue = false;   // the bracket just resolved into a value
+        outer.pendingDivide = false;
+      } else {
+        break; // this frame isn't computable yet — wait for more cards
+      }
+    }
+  }
+
+  function isComplete(chain){
+    // A single lone card (e.g. just one number) never counts as a finished chain —
+    // the root needs at least one operation played into it, and every bracket must
+    // already have self-closed, before the whole chain can resolve.
+    if(chain.frames.length !== 1) return false;
+    const f = chain.frames[0];
+    return f.expectValue === false && f.opCount >= 1;
+  }
+
+  function evalChain(chain){
+    const expr = chain.tokens.join('');
+    let val;
+    try{
+      // Safe: tokens are only ever 0-9, + - * / ( )
+      /* eslint-disable no-new-func */
+      val = Function('"use strict"; return (' + expr + ');')();
+    } catch(e){ val = NaN; }
+    if(!isFinite(val)) val = 0;
+    return Math.round(val * 100) / 100;
+  }
+
+  // Clones the given chain (or starts a fresh one) and applies the pending card to the
+  // CLONE only, purely so render() can show a ghost preview without touching real state.
+  function buildPreviewChain(chain, cardId){
+    const card = findCardInHand(cardId);
+    if(!card) return chain;
+    let preview;
+    if(chain === null){
+      preview = newChain();
+      preview.element = card.element;
+    } else {
+      preview = JSON.parse(JSON.stringify(chain));
+    }
+    if(wouldDivideByZero(card, preview)) return chain || preview;
+    applyCardToChain(card, preview);
+    return preview;
+  }
+
+  function hasLegalMove(player){
+    const openSlots = activeChainCount() < 3;
+    for(const card of player.hand){
+      for(let i=0;i<3;i++){
+        const chain = state.chains[i];
+        if(chain === null){
+          if(openSlots && canPlayOnChain(card, null)) return true;
+        } else {
+          if(canPlayOnChain(card, chain) && !wouldDivideByZero(card, chain)) return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  // ---------------- UI State ----------------
+  let selectedCardId = null;
+  let pendingPlacement = null; // {cardId, slotIdx} — awaiting Confirm/Cancel before it actually commits
+  let bonusMode = false; // true when we're in "play a free number card" sub-turn
+  let bonusChainIndex = null;
+
+  // ---------------- Match Stats (for the post-game breakdown) ----------------
+  function freshMatchStats(){
+    return {
+      chains: [],                          // {value, element, playerIdx, tokenCount, hadBracket, expr}
+      elementCounts: {sun:0, snow:0, sky:0} // cards played, across both players
+    };
+  }
+  let matchStats = freshMatchStats();
+
+  function recordCardPlayed(card){
+    matchStats.elementCounts[card.element] = (matchStats.elementCounts[card.element]||0) + 1;
+  }
+
+  function recordChainResolved(chain, value, playerIdx){
+    matchStats.chains.push({
+      value: value,
+      element: chain.element,
+      playerIdx: playerIdx,
+      tokenCount: chain.tokens.length,
+      hadBracket: chain.tokens.indexOf('(') !== -1,
+      expr: chain.tokens.join(' ')
+    });
+  }
+
+  const BONUS_SECONDS = 15; // fixed, not configurable
+  let selectedTurnSeconds = 30; // default, changed via setup chips — only used if timer is enabled
+  let selectedPenalty = 10;     // default, changed via setup chips — only used if timer is enabled
+  let timerEnabled = false;     // off by default — the whole timer feature is opt-in
+
+  // ---------------- Shot Clock ----------------
+  let shotClockInterval = null;
+  let shotClockRemaining = 0;
+
+  function clearShotClock(){
+    if(shotClockInterval){ clearInterval(shotClockInterval); shotClockInterval = null; }
+    const wrap = document.getElementById('shot-clock');
+    if(wrap) wrap.classList.toggle('hidden', !state || !state.timerEnabled);
+  }
+
+  // Only ever starts a real countdown if the timer is enabled for this game.
+  function maybeStartShotClock(seconds, label, onExpire){
+    if(!state || !state.timerEnabled){
+      clearShotClock();
+      return;
+    }
+    startShotClock(seconds, label, onExpire);
+  }
+
+  function startShotClock(seconds, label, onExpire){
+    clearShotClock();
+    shotClockRemaining = seconds;
+    updateClockDisplay(label);
+    shotClockInterval = setInterval(()=>{
+      shotClockRemaining--;
+      updateClockDisplay(label);
+      if(shotClockRemaining <= 0){
+        clearShotClock();
+        onExpire();
+      }
+    }, 1000);
+  }
+
+  function updateClockDisplay(label){
+    const numEl = document.getElementById('clock-num');
+    const labelEl = document.getElementById('clock-label');
+    if(!numEl || !labelEl) return;
+    labelEl.textContent = label;
+    numEl.textContent = shotClockRemaining;
+    numEl.classList.remove('warn','danger');
+    if(shotClockRemaining <= 5) numEl.classList.add('danger');
+    else if(shotClockRemaining <= 10) numEl.classList.add('warn');
+  }
+
+  function elFromKey(k){ return ELEMENTS.find(e=>e.key===k); }
+
+  function log(html){
+    const el = document.getElementById('log');
+    const div = document.createElement('div');
+    div.innerHTML = html;
+    el.appendChild(div);
+    el.scrollTop = el.scrollHeight;
+  }
+
+  function playerColorClass(idx){ return idx===0 ? 'pl1' : 'pl2'; }
+
+  function render(){
+    // scoreboard
+    for(let i=0;i<2;i++){
+      document.getElementById('pname'+i).textContent = state.players[i].name;
+      document.getElementById('pscore'+i).textContent = state.players[i].score.toFixed(2);
+      document.getElementById('pturn'+i).textContent = (state.turn===i && !state.gameOver) ? '\u25B8 current turn' : '';
+      document.getElementById('plaque'+i).classList.toggle('active', state.turn===i && !state.gameOver);
+    }
+
+    // board
+    const board = document.getElementById('board');
+    board.innerHTML = '';
+    for(let i=0;i<3;i++){
+      const chain = state.chains[i];
+      const slot = document.createElement('div');
+      slot.className = 'chain-slot';
+      slot.dataset.idx = i;
+
+      const head = document.createElement('div');
+      head.className = 'slot-head';
+      const label = document.createElement('span');
+      label.textContent = 'Chain ' + (i+1);
+      head.appendChild(label);
+      if(chain){
+        const tag = document.createElement('span');
+        const el = elFromKey(chain.element);
+        tag.className = 'elem-tag ' + chain.element;
+        tag.textContent = el.glyph + ' ' + el.label;
+        head.appendChild(tag);
+      }
+      slot.appendChild(head);
+
+      if(!chain){
+        if(pendingPlacement && pendingPlacement.slotIdx === i){
+          const previewChain = buildPreviewChain(null, pendingPlacement.cardId);
+          const expr = document.createElement('div');
+          expr.className = 'chain-expr';
+          (previewChain ? previewChain.display : []).forEach(t=>{
+            const s = document.createElement('span');
+            s.className = 'tok ghost ' + t.kind;
+            s.textContent = t.sym;
+            expr.appendChild(s);
+          });
+          slot.appendChild(expr);
+        } else if(resolveFlashes[i]){
+          const flash = resolveFlashes[i];
+          const expr = document.createElement('div');
+          expr.className = 'chain-expr resolved';
+          flash.display.forEach(t=>{
+            const s = document.createElement('span');
+            s.className = 'tok ' + t.kind;
+            s.textContent = t.sym;
+            expr.appendChild(s);
+          });
+          const eq = document.createElement('span');
+          eq.className = 'tok resolved-value';
+          eq.textContent = ' = ' + flash.value.toFixed(2);
+          expr.appendChild(eq);
+          slot.appendChild(expr);
+          slot.classList.add('resolved-flash');
+        } else {
+          const empty = document.createElement('div');
+          empty.className = 'chain-empty';
+          empty.textContent = 'Open — play a card to start a chain';
+          slot.appendChild(empty);
+        }
+      } else {
+        const expr = document.createElement('div');
+        expr.className = 'chain-expr';
+        const isPendingHere = pendingPlacement && pendingPlacement.slotIdx === i;
+        const previewChain = isPendingHere ? buildPreviewChain(chain, pendingPlacement.cardId) : null;
+        const tokensToShow = previewChain ? previewChain.display : chain.display;
+        tokensToShow.forEach((t, ti)=>{
+          const s = document.createElement('span');
+          const isGhostTok = isPendingHere && ti >= chain.display.length;
+          s.className = 'tok ' + t.kind + (isGhostTok ? ' ghost' : '');
+          s.textContent = t.sym;
+          expr.appendChild(s);
+        });
+        slot.appendChild(expr);
+      }
+
+      if(pendingPlacement && pendingPlacement.slotIdx === i){
+        slot.classList.add('pending');
+      }
+
+      // selectable?
+      if(!state.gameOver && selectedCardId && !pendingPlacement){
+        const card = findCardInHand(selectedCardId);
+        if(card){
+          let legal;
+          if(chain === null){
+            legal = activeChainCount() < 3 && canPlayOnChain(card, null);
+          } else {
+            legal = canPlayOnChain(card, chain) && !wouldDivideByZero(card, chain);
+          }
+          if(legal){
+            slot.classList.add('selectable');
+            slot.addEventListener('click', ()=>onSlotClick(i));
+          }
+        }
+      }
+
+      board.appendChild(slot);
+    }
+
+    // hand
+    const activePlayer = state.players[state.turn];
+    const aiTurn = isAiTurn();
+    document.getElementById('hand-owner').textContent = aiTurn ? activePlayer.name : (activePlayer.name + "'s Hand");
+    document.getElementById('hand-hint').textContent = aiTurn
+      ? 'Thinking\u2026'
+      : pendingPlacement
+      ? 'Confirm to lock in this play, or cancel to pick again.'
+      : bonusMode
+      ? 'Star bonus: pick a number card, or skip.'
+      : (selectedCardId ? 'Now click a chain to place it.' : 'Select a card to play.');
+
+    document.getElementById('deselect-btn').classList.toggle('hidden', !!pendingPlacement || aiTurn);
+    document.getElementById('confirm-placement-btn').classList.toggle('hidden', !pendingPlacement || aiTurn);
+    document.getElementById('cancel-placement-btn').classList.toggle('hidden', !pendingPlacement || aiTurn);
+
+    const handEl = document.getElementById('hand');
+    handEl.innerHTML = '';
+
+    if(aiTurn){
+      for(let k=0;k<activePlayer.hand.length;k++){
+        const back = document.createElement('div');
+        back.className = 'card ai-card-back';
+        handEl.appendChild(back);
+      }
+      board.classList.add('ai-turn-lock');
+      return;
+    }
+    board.classList.remove('ai-turn-lock');
+
+    const hand = state.players[state.turn].hand;
+    hand.forEach(card=>{
+      const c = document.createElement('div');
+      c.className = 'card ' + card.element;
+      c.dataset.id = card.id;
+
+      let playable;
+      if(state.gameOver){
+        playable = false;
+      } else if(pendingPlacement){
+        playable = false;
+      } else if(bonusMode){
+        playable = card.kind==='number' && canPlayOnChain(card, state.chains[bonusChainIndex]) && !wouldDivideByZero(card, state.chains[bonusChainIndex]);
+      } else {
+        playable = true; // selectability enforced on click / highlighted via chains
+      }
+
+      if(!playable) c.classList.add('disabled');
+      if(selectedCardId === card.id) c.classList.add('selected');
+
+      const sym = card.kind==='number' ? String(card.value) : (card.op==='{}' ? '{ }' : OP_SYMBOL[card.op]);
+      c.innerHTML = '<div>'+sym+'</div>' +
+        (card.star ? '<div class="star">\u2605</div>' : '') +
+        '<div class="elabel">'+card.element+'</div>';
+
+      c.addEventListener('click', ()=>onCardClick(card));
+      handEl.appendChild(c);
+    });
+  }
+
+  function findCardInHand(id){
+    return state.players[state.turn].hand.find(c=>c.id===id) || null;
+  }
+
+  function onCardClick(card){
+    if(state.gameOver) return;
+    if(isAiTurn()) return;
+    if(pendingPlacement) return;
+    if(bonusMode){
+      if(card.kind !== 'number') return;
+      const chain = state.chains[bonusChainIndex];
+      if(!canPlayOnChain(card, chain) || wouldDivideByZero(card, chain)) return;
+      // play it directly
+      clearShotClock();
+      removeCardFromHand(card.id);
+      applyCardToChain(card, chain);
+      recordCardPlayed(card);
+      log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> plays free number <b>'+card.value+'</b> (bonus).');
+      finishBonusAndMaybeResolve(bonusChainIndex);
+      return;
+    }
+    if(selectedCardId === card.id){
+      selectedCardId = null;
+    } else {
+      selectedCardId = card.id;
+    }
+    render();
+  }
+
+  function removeCardFromHand(id){
+    const hand = state.players[state.turn].hand;
+    const idx = hand.findIndex(c=>c.id===id);
+    if(idx>=0){
+      const removed = hand.splice(idx,1)[0];
+      if(state.playedCards) state.playedCards.push(removed);
+    }
+  }
+
+  function onSlotClick(idx){
+    if(state.gameOver || bonusMode || pendingPlacement || isAiTurn()) return;
+    const card = findCardInHand(selectedCardId);
+    if(!card) return;
+    const chain = state.chains[idx];
+
+    if(chain === null){
+      if(activeChainCount() >= 3) return;
+      if(!canPlayOnChain(card, null)) return;
+    } else {
+      if(!canPlayOnChain(card, chain)) return;
+      if(wouldDivideByZero(card, chain)){
+        flashHint('Cannot divide by zero.');
+        return;
+      }
+    }
+
+    // Stage it — nothing is committed yet. render() will show a ghost preview
+    // in this slot plus Confirm/Cancel controls, so a misclick can't lock in a move.
+    pendingPlacement = { cardId: card.id, slotIdx: idx };
+    render();
+  }
+
+  function cancelPlacement(){
+    if(!pendingPlacement) return;
+    pendingPlacement = null;
+    render();
+  }
+
+  function commitPlacement(){
+    if(!pendingPlacement) return;
+    const { cardId, slotIdx } = pendingPlacement;
+    pendingPlacement = null;
+    const card = findCardInHand(cardId);
+    if(!card){ render(); return; } // shouldn't happen, but never crash on a stale reference
+
+    let chain = state.chains[slotIdx];
+    if(chain === null){
+      if(activeChainCount() >= 3 || !canPlayOnChain(card, null)){ render(); return; }
+      chain = newChain();
+      chain.element = card.element;
+      state.chains[slotIdx] = chain;
+    } else {
+      if(!canPlayOnChain(card, chain) || wouldDivideByZero(card, chain)){ render(); return; }
+    }
+
+    clearShotClock();
+    removeCardFromHand(card.id);
+    applyCardToChain(card, chain);
+    recordCardPlayed(card);
+    const sym = card.kind==='number' ? String(card.value) : (card.op==='{}' ? '{ }' : OP_SYMBOL[card.op]);
+    log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> plays <b>'+sym+'</b>'+(card.star?' \u2605':'')+' on Chain '+(slotIdx+1)+'.');
+
+    selectedCardId = null;
+
+    if(card.kind==='op' && card.star && !isComplete(chain)){
+      // enter bonus mode if there's a legal number follow-up
+      const hasBonusMove = state.players[state.turn].hand.some(c=>c.kind==='number' && canPlayOnChain(c, chain) && !wouldDivideByZero(c, chain));
+      if(hasBonusMove){
+        bonusMode = true;
+        bonusChainIndex = slotIdx;
+        document.getElementById('bonus-banner').classList.remove('hidden');
+        render();
+        maybeStartShotClock(BONUS_SECONDS, 'Bonus', bonusTimeout);
+        return;
+      }
+    }
+
+    maybeResolveChain(slotIdx);
+    endTurn();
+  }
+
+  function finishBonusAndMaybeResolve(idx){
+    bonusMode = false;
+    bonusChainIndex = null;
+    document.getElementById('bonus-banner').classList.add('hidden');
+    maybeResolveChain(idx);
+    endTurn();
+  }
+
+  function applyTimeoutPenalty(){
+    if(!state.timerEnabled || !state.penalty) return;
+    const player = state.players[state.turn];
+    player.score -= state.penalty;
+    return state.penalty;
+  }
+
+  function skipBonus(reason){
+    if(!bonusMode) return;
+    clearShotClock();
+    bonusMode = false;
+    bonusChainIndex = null;
+    document.getElementById('bonus-banner').classList.add('hidden');
+    if(reason === 'timeout'){
+      const penalty = applyTimeoutPenalty();
+      log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time on the bonus'+(penalty ? ' — <span class="score">-'+penalty.toFixed(2)+' pts</span>' : '')+'.');
+    }
+    endTurn();
+  }
+
+  function bonusTimeout(){
+    skipBonus('timeout');
+  }
+
+  const RESOLVE_FLASH_MS = 900;
+  let resolveFlashes = {}; // idx -> {display, value} — purely cosmetic, doesn't affect legality
+
+  function maybeResolveChain(idx){
+    const chain = state.chains[idx];
+    if(chain && isComplete(chain)){
+      const value = evalChain(chain);
+      state.players[state.turn].score += value;
+      recordChainResolved(chain, value, state.turn);
+      log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> completes Chain '+(idx+1)+' — <span class="score">+'+value.toFixed(2)+' pts</span> ('+chain.tokens.join(' ')+' = '+value.toFixed(2)+')');
+      resolveFlashes[idx] = { display: chain.display.slice(), value: value };
+      state.chains[idx] = null;
+      setTimeout(()=>{ delete resolveFlashes[idx]; render(); }, RESOLVE_FLASH_MS);
+    }
+  }
+
+  function flashHint(msg){
+    document.getElementById('hand-hint').textContent = msg;
+  }
+
+  // ---------------- AI Opponent ----------------
+  // The AI looks 4 plies ahead (its move, your reply, its move, your reply) while guessing
+  // at your hidden hand from the cards it hasn't seen yet. It never peeks at your cards.
+  // Easy difficulty uses the old greedy 1-ply heuristic below (also the fallback).
+
+  function isAiTurn(){
+    return !!(state && state.mode === 'ai' && state.turn === state.aiPlayerIndex && !state.gameOver);
+  }
+
+  function scheduleAiTurn(){
+    if(!isAiTurn()) return;
+    const myTurnToken = state.turn;
+    setTimeout(()=>{
+      // Guard against a restarted/changed game firing a stale callback.
+      if(!state || !isAiTurn() || state.turn !== myTurnToken) return;
+      aiTakeTurn();
+    }, 850 + Math.random()*550);
+  }
+
+  function cloneChainForSim(chain){
+    return JSON.parse(JSON.stringify(chain));
+  }
+
+  // Heuristic score for playing `card` into `chain` (chain===null starts a new one).
+  // Simulated on a clone — never touches real game state.
+  function scoreCandidateMove(card, chain){
+    const sim = chain ? cloneChainForSim(chain) : newChain();
+    if(chain === null) sim.element = card.element;
+    if(wouldDivideByZero(card, sim)) return -Infinity;
+    applyCardToChain(card, sim);
+    if(isComplete(sim)){
+      const value = evalChain(sim);
+      return value * 2.2 + (card.star ? 1.5 : 0);
+    }
+    // Not complete yet: mild preference for star cards (extra tempo), and a mild
+    // penalty for leaving a well-developed chain one card from done, since the
+    // opponent could snipe it next turn.
+    const frame = sim.frames[sim.frames.length-1];
+    let riskPenalty = 0;
+    if(sim.frames.length === 1 && frame.expectValue === true && frame.opCount >= 1){
+      riskPenalty = 0.6 * frame.opCount;
+    }
+    return 0.4 + (card.star ? 1.2 : 0) - riskPenalty + Math.random()*0.3;
+  }
+
+  // ---- Search-based AI (determinized look-ahead) ----
+  // The AI can't see the human's hand. It tracks every card played so far, works out which
+  // cards are still unseen, deals the human a random hand from them, and runs a 4-ply
+  // alpha-beta search (AI, human, AI, human). It repeats that with several different
+  // random hands and plays the move that does best on average.
+  const AI_SEARCH_DEPTH = 4;
+  const AI_TIME_BUDGET_MS = 600;
+  const AI_MAX_SAMPLES = 24;
+
+  function aiCardKey(c){
+    return c.element + (c.kind==='number' ? 'n'+c.value : 'o'+c.op+(c.star?'*':''));
+  }
+  function fastCloneChain(c){
+    if(!c) return null;
+    return { element:c.element, tokens:c.tokens.slice(), display:c.display.slice(),
+             frames:c.frames.map(f=>({expectValue:f.expectValue, opCount:f.opCount, pendingDivide:f.pendingDivide})) };
+  }
+  function freshChainFor(card){
+    const ch = newChain(); ch.element = card.element; return ch;
+  }
+  function sLegalMoves(hand, chains){
+    const moves = [], seen = new Set();
+    const active = chains.filter(c=>c).length;
+    const firstEmpty = chains.findIndex(c=>c===null);
+    for(const card of hand){
+      const k = aiCardKey(card);
+      if(seen.has(k)) continue;
+      seen.add(k);
+      for(let i=0;i<3;i++){
+        const ch = chains[i];
+        if(ch === null){
+          if(i===firstEmpty && active<3 && canPlayOnChain(card, null)) moves.push({card, slot:i});
+        } else if(canPlayOnChain(card, ch) && !wouldDivideByZero(card, ch)){
+          moves.push({card, slot:i});
+        }
+      }
+    }
+    return moves;
+  }
+  function sBonusOptions(hand, chains, m){
+    if(!(m.card.kind==='op' && m.card.star)) return [];
+    const sim = fastCloneChain(chains[m.slot]) || freshChainFor(m.card);
+    applyCardToChain(m.card, sim);
+    if(isComplete(sim)) return [];
+    const out = [], seen = new Set();
+    for(const c of hand){
+      if(c === m.card || c.kind !== 'number') continue;
+      const k = aiCardKey(c);
+      if(seen.has(k)) continue;
+      seen.add(k);
+      if(canPlayOnChain(c, sim) && !wouldDivideByZero(c, sim)) out.push(c);
+    }
+    return out;
+  }
+  // S = {hands:[h0,h1], chains:[3], scores:[s0,s1]}; returns a new state after player p plays.
+  function sApply(S, p, m, bonus){
+    const N = { hands:[S.hands[0], S.hands[1]], chains:S.chains.slice(), scores:S.scores.slice() };
+    const hand = S.hands[p].slice();
+    hand.splice(hand.indexOf(m.card), 1);
+    let chain = fastCloneChain(S.chains[m.slot]) || freshChainFor(m.card);
+    applyCardToChain(m.card, chain);
+    if(bonus){
+      hand.splice(hand.indexOf(bonus), 1);
+      applyCardToChain(bonus, chain);
+    }
+    N.hands[p] = hand;
+    if(isComplete(chain)){
+      N.scores[p] += evalChain(chain);
+      N.chains[m.slot] = null;
+    } else {
+      N.chains[m.slot] = chain;
+    }
+    return N;
+  }
+  // Every (card, slot[, forced bonus]) option for player p. A star card is always followed by
+  // a bonus number when one exists (the same thing the live game's AI does).
+  function sOptions(S, p){
+    const out = [];
+    for(const m of sLegalMoves(S.hands[p], S.chains)){
+      const bo = sBonusOptions(S.hands[p], S.chains, m);
+      if(bo.length) bo.forEach(b=>out.push({m, bonus:b}));
+      else out.push({m, bonus:null});
+    }
+    return out;
+  }
+  function sSearch(S, p, d, alpha, beta){
+    const opts = sOptions(S, p);
+    if(!opts.length || d === 0) return S.scores[p] - S.scores[1-p];
+    const kids = opts.map(o=>{
+      const N = sApply(S, p, o.m, o.bonus);
+      return { N, g:N.scores[p]-S.scores[p] };
+    }).sort((a,b)=>b.g-a.g);
+    let best = -Infinity;
+    for(const k of kids){
+      const v = -sSearch(k.N, 1-p, d-1, -beta, -alpha);
+      if(v > best) best = v;
+      if(best > alpha) alpha = best;
+      if(alpha >= beta) break;
+    }
+    return best;
+  }
+  // Cards the AI has not seen: the full deck minus its own hand minus everything played.
+  function unseenCards(aiIdx){
+    const known = new Set(state.players[aiIdx].hand.map(c=>c.id));
+    (state.playedCards || []).forEach(c=>known.add(c.id));
+    return (state.fullDeck || []).filter(c=>!known.has(c.id));
+  }
+  function sampleHand(pool, size){
+    const a = pool.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a.slice(0, size);
+  }
+  // Returns {m:{card,slot}, bonus:card|null}, or null if there's nothing to play.
+  function aiChoosePlay(aiIdx, budgetMs, depth, maxSamples){
+    const me = state.players[aiIdx].hand.slice();
+    const oppIdx = 1 - aiIdx;
+    const oppSize = state.players[oppIdx].hand.length;
+    const pool = unseenCards(aiIdx);
+    const chains = state.chains.map(fastCloneChain);
+    const rootOpts = sOptions({hands:[me, []], chains, scores:[0,0]}, 0);
+    if(!rootOpts.length) return null;
+    if(rootOpts.length === 1) return rootOpts[0];
+    const totals = new Array(rootOpts.length).fill(0);
+    const t0 = Date.now();
+    let samples = 0;
+    while(samples < maxSamples){
+      const opp = pool.length >= oppSize ? sampleHand(pool, oppSize) : pool.slice();
+      const S = { hands:[me, opp], chains, scores:[0,0] };
+      for(let i=0;i<rootOpts.length;i++){
+        const N = sApply(S, 0, rootOpts[i].m, rootOpts[i].bonus);
+        totals[i] += -sSearch(N, 1, depth-1, -Infinity, Infinity);
+      }
+      samples++;
+      if(Date.now() - t0 > budgetMs) break;
+    }
+    let bi = 0;
+    for(let i=1;i<totals.length;i++){
+      if(totals[i] > totals[bi] + 1e-9 || (Math.abs(totals[i]-totals[bi])<=1e-9 && Math.random()<0.5)) bi = i;
+    }
+    return rootOpts[bi];
+  }
+
+  function collectLegalMoves(player){
+    const moves = [];
+    const openSlots = activeChainCount() < 3;
+    for(const card of player.hand){
+      for(let i=0;i<3;i++){
+        const chain = state.chains[i];
+        if(chain === null){
+          if(openSlots && canPlayOnChain(card, null)) moves.push({card, slotIdx:i, chain:null});
+        } else if(canPlayOnChain(card, chain) && !wouldDivideByZero(card, chain)){
+          moves.push({card, slotIdx:i, chain});
+        }
+      }
+    }
+    return moves;
+  }
+
+  function pickBestMove(moves){
+    let best = null, bestScore = -Infinity;
+    for(const m of moves){
+      const s = scoreCandidateMove(m.card, m.chain);
+      if(s > bestScore){ bestScore = s; best = m; }
+    }
+    return best;
+  }
+
+  function aiTakeTurn(){
+    const player = state.players[state.turn];
+    const moves = collectLegalMoves(player);
+    if(moves.length === 0){
+      // Shouldn't happen — checkGameOver() would have ended the game first — but never hang.
+      endTurn();
+      return;
+    }
+    let move = null, plannedBonus = null;
+    try{
+      const plan = state.difficulty === 'easy' ? null : aiChoosePlay(state.turn, AI_TIME_BUDGET_MS, AI_SEARCH_DEPTH, AI_MAX_SAMPLES);
+      if(plan){
+        const real = moves.find(x=>x.card.id===plan.m.card.id && x.slotIdx===plan.m.slot)
+                  || moves.find(x=>aiCardKey(x.card)===aiCardKey(plan.m.card) && x.slotIdx===plan.m.slot);
+        if(real){ move = real; plannedBonus = plan.bonus; }
+      }
+    }catch(e){ move = null; }
+    if(!move) move = pickBestMove(moves); // safety net: the old greedy heuristic
+    const idx = move.slotIdx;
+    let chain = state.chains[idx];
+    if(chain === null){
+      chain = newChain();
+      chain.element = move.card.element;
+      state.chains[idx] = chain;
+    }
+
+    clearShotClock();
+    removeCardFromHand(move.card.id);
+    applyCardToChain(move.card, chain);
+    recordCardPlayed(move.card);
+    const sym = move.card.kind==='number' ? String(move.card.value) : (move.card.op==='{}' ? '{ }' : OP_SYMBOL[move.card.op]);
+    log('<span class="'+playerColorClass(state.turn)+'">'+player.name+'</span> plays <b>'+sym+'</b>'+(move.card.star?' \u2605':'')+' on Chain '+(idx+1)+'.');
+
+    if(move.card.kind==='op' && move.card.star && !isComplete(chain)){
+      const bonusCandidates = player.hand.filter(c=>c.kind==='number' && canPlayOnChain(c, chain) && !wouldDivideByZero(c, chain));
+      if(bonusCandidates.length){
+        let bestCard = null, bestScore = -Infinity;
+        if(plannedBonus){
+          bestCard = bonusCandidates.find(c=>aiCardKey(c)===aiCardKey(plannedBonus)) || null;
+        }
+        if(!bestCard) for(const c of bonusCandidates){
+          const s = scoreCandidateMove(c, chain);
+          if(s > bestScore){ bestScore = s; bestCard = c; }
+        }
+        removeCardFromHand(bestCard.id);
+        applyCardToChain(bestCard, chain);
+        recordCardPlayed(bestCard);
+        log('<span class="'+playerColorClass(state.turn)+'">'+player.name+'</span> plays free number <b>'+bestCard.value+'</b> (bonus).');
+      }
+    }
+
+    maybeResolveChain(idx);
+    endTurn();
+  }
+
+  function endTurn(){
+    state.turn = 1 - state.turn;
+    checkGameOver();
+    render();
+    if(!state.gameOver){
+      maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      if(isAiTurn()) scheduleAiTurn();
+    }
+  }
+
+  function mainTimeout(){
+    if(state.gameOver || bonusMode) return;
+    const penalty = applyTimeoutPenalty();
+    log('<span class="'+playerColorClass(state.turn)+'">'+state.players[state.turn].name+'</span> ran out of time — turn forfeited'+(penalty ? ' — <span class="score">-'+penalty.toFixed(2)+' pts</span>' : '')+'.');
+    selectedCardId = null;
+    pendingPlacement = null;
+    endTurn();
+  }
+
+  function checkGameOver(){
+    const player = state.players[state.turn];
+    if(!hasLegalMove(player)){
+      state.gameOver = true;
+      clearShotClock();
+      showGameOver(player);
+    }
+  }
+
+  function buildStatBreakdown(){
+    const el = document.getElementById('over-stats');
+    const chains = matchStats.chains;
+    const rows = [];
+
+    if(chains.length === 0){
+      el.innerHTML = '<div class="stat-row"><span>No chains were completed this duel.</span></div>';
+      return;
+    }
+
+    // biggest chain
+    let biggest = chains[0];
+    for(const c of chains) if(c.value > biggest.value) biggest = c;
+    const biggestOwner = state.players[biggest.playerIdx].name;
+    rows.push(['Biggest chain', biggestOwner + ' — ' + biggest.value.toFixed(2) + ' (' + biggest.expr + ')']);
+
+    // most-used element (cards actually played, either player)
+    const ec = matchStats.elementCounts;
+    let topElement = 'sun';
+    for(const k of ['snow','sky']) if(ec[k] > ec[topElement]) topElement = k;
+    const elInfo = elFromKey(topElement);
+    rows.push(['Most-used element', elInfo.glyph + ' ' + elInfo.label + ' (' + ec[topElement] + ' cards played)']);
+
+    // average chain value
+    const avg = chains.reduce((s,c)=>s+c.value, 0) / chains.length;
+    rows.push(['Average chain value', avg.toFixed(2) + ' pts over ' + chains.length + ' chain' + (chains.length===1?'':'s')]);
+
+    // longest bracket expression
+    const bracketed = chains.filter(c=>c.hadBracket);
+    if(bracketed.length){
+      let longest = bracketed[0];
+      for(const c of bracketed) if(c.tokenCount > longest.tokenCount) longest = c;
+      rows.push(['Longest bracket chain', state.players[longest.playerIdx].name + ' — ' + longest.expr]);
+    } else {
+      rows.push(['Longest bracket chain', 'None played']);
+    }
+
+    el.innerHTML = rows.map(([label,val])=>
+      '<div class="stat-row"><span>'+label+'</span><b>'+val+'</b></div>'
+    ).join('');
+  }
+
+  function showGameOver(stuckPlayer){
+    const p0 = state.players[0], p1 = state.players[1];
+    document.getElementById('over-n0').textContent = p0.score.toFixed(2);
+    document.getElementById('over-n1').textContent = p1.score.toFixed(2);
+    document.getElementById('over-l0').textContent = p0.name;
+    document.getElementById('over-l1').textContent = p1.name;
+
+    let title, sub;
+    if(p0.score === p1.score){
+      title = 'A Draw';
+    } else {
+      const winner = p0.score > p1.score ? p0 : p1;
+      title = winner.name + ' wins!';
+    }
+    sub = stuckPlayer.name + ' has no legal move left — the duel ends.';
+    document.getElementById('over-title').textContent = title;
+    document.getElementById('over-sub').textContent = sub;
+    buildStatBreakdown();
+    document.getElementById('overlay').classList.remove('hidden');
+  }
+
+  // ---------------- Setup wiring ----------------
+  document.getElementById('start-btn').addEventListener('click', startGame);
+  document.getElementById('deselect-btn').addEventListener('click', ()=>{ selectedCardId=null; render(); });
+  document.getElementById('confirm-placement-btn').addEventListener('click', commitPlacement);
+  document.getElementById('cancel-placement-btn').addEventListener('click', cancelPlacement);
+  document.getElementById('skip-bonus').addEventListener('click', ()=>skipBonus('manual'));
+  document.getElementById('restart-btn').addEventListener('click', ()=>{
+    clearShotClock();
+    document.getElementById('overlay').classList.add('hidden');
+    document.getElementById('game-screen').classList.add('hidden');
+    document.getElementById('setup-screen').classList.remove('hidden');
+  });
+
+  document.getElementById('timer-toggle').querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('timer-toggle').querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      timerEnabled = (btn.dataset.val === 'on');
+      document.getElementById('timer-choice').classList.toggle('chips-disabled', !timerEnabled);
+      document.getElementById('penalty-choice').classList.toggle('chips-disabled', !timerEnabled);
+    });
+  });
+
+  let selectedMode = 'pvp';
+  let selectedDifficulty = 'hard';
+  document.querySelectorAll('#difficulty-choice .chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(selectedMode !== 'ai') return;
+      document.querySelectorAll('#difficulty-choice .chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedDifficulty = btn.dataset.val;
+    });
+  });
+  document.getElementById('mode-toggle').querySelectorAll('.chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('mode-toggle').querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedMode = btn.dataset.val;
+      const p2input = document.getElementById('p2name');
+      const p2field = document.getElementById('p2-field');
+      if(selectedMode === 'ai'){
+        p2field.classList.add('chips-disabled');
+        document.getElementById('difficulty-choice').classList.remove('chips-disabled');
+        p2input.value = 'AI Opponent';
+      } else {
+        p2field.classList.remove('chips-disabled');
+        document.getElementById('difficulty-choice').classList.add('chips-disabled');
+        if(p2input.value === 'AI Opponent') p2input.value = '';
+      }
+    });
+  });
+
+  document.querySelectorAll('#timer-choice .chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#timer-choice .chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedTurnSeconds = parseInt(btn.dataset.val, 10);
+    });
+  });
+
+  document.querySelectorAll('#penalty-choice .chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('#penalty-choice .chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedPenalty = parseInt(btn.dataset.val, 10);
+    });
+  });
+
+  function startGame(){
+    const p1name = document.getElementById('p1name').value.trim() || 'Player 1';
+    const p2name = selectedMode === 'ai' ? 'AI Opponent' : (document.getElementById('p2name').value.trim() || 'Player 2');
+    const deck = shuffle(buildDeck());
+    const handSize = Math.floor(deck.length / 2); // deal the max possible per player
+
+    const hand0 = deck.slice(0, handSize);
+    const hand1 = deck.slice(handSize, handSize*2);
+
+    state = {
+      fullDeck: deck.slice(),
+      playedCards: [],
+      players: [
+        {name:p1name, hand:hand0, score:0},
+        {name:p2name, hand:hand1, score:0}
+      ],
+      chains:[null,null,null],
+      turn:0,
+      gameOver:false,
+      timerEnabled: timerEnabled,
+      turnSeconds: selectedTurnSeconds,
+      penalty: selectedPenalty,
+      mode: selectedMode,
+      difficulty: selectedDifficulty,
+      aiPlayerIndex: selectedMode === 'ai' ? 1 : -1
+    };
+    selectedCardId = null;
+    pendingPlacement = null;
+    bonusMode = false;
+    bonusChainIndex = null;
+    resolveFlashes = {};
+    matchStats = freshMatchStats();
+    document.getElementById('log').innerHTML = '';
+    document.getElementById('setup-screen').classList.add('hidden');
+    document.getElementById('game-screen').classList.remove('hidden');
+    document.getElementById('shot-clock').classList.toggle('hidden', !state.timerEnabled);
+    log('Deck shuffled. '+p1name+' and '+p2name+' each drew '+handSize+' cards.'
+      + (state.timerEnabled ? ' Turn timer: '+state.turnSeconds+'s (time-out penalty: -'+state.penalty+' pts).' : ' Untimed game.'));
+
+    checkGameOver();
+    render();
+    if(!state.gameOver){
+      if(isAiTurn()){
+        maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+        scheduleAiTurn();
+      } else {
+        maybeStartShotClock(state.turnSeconds, 'Turn', mainTimeout);
+      }
+    }
+  }
+
+})();
+</script>
+</body>
+</html>

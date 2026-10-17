@@ -728,46 +728,6 @@
         <label>Duelist Two</label>
         <input type="text" id="p2name" placeholder="Player 2" maxlength="16">
       </div>
-      <div class="field">        <label>Turn Timer</label>
-        <div class="timer-choice" id="timer-toggle">
-          <button type="button" class="chip selected" data-val="off">Off</button>
-          <button type="button" class="chip" data-val="on">On</button>
-        </div>
-      </div>
-
-      <div class="field timer-sub" id="seconds-field">
-        <label>Seconds Per Turn</label>
-        <div class="timer-choice chips-disabled" id="timer-choice">
-          <button type="button" class="chip" data-val="15">15s</button>
-          <button type="button" class="chip selected" data-val="30">30s</button>
-          <button type="button" class="chip" data-val="45">45s</button>
-          <button type="button" class="chip" data-val="60">60s</button>
-        </div>
-      </div>
-
-      <div class="field timer-sub" id="penalty-field">
-        <label>Time-Out Penalty</label>
-        <div class="timer-choice chips-disabled" id="penalty-choice">
-          <button type="button" class="chip" data-val="5">-5</button>
-          <button type="button" class="chip selected" data-val="10">-10</button>
-          <button type="button" class="chip" data-val="15">-15</button>
-          <button type="button" class="chip" data-val="30">-30</button>
-        </div>
-      </div>
-
-      <details class="warning-dropdown">
-        <summary>Warning <span class="chev">+</span></summary>
-        <div class="warning-body">
-          <p>Turning on a turn timer opens the door to a strategic exploit: a player
-          stuck with no good move can simply let the clock run out on purpose instead
-          of playing a bad card, effectively "passing" for free. The time-out penalty
-          above exists specifically to discourage this — every time-out, whether on a
-          main turn or a star-card bonus, docks that player points (scores can go
-          negative). Pick a penalty steep enough to make stalling not worth it, or
-          just leave the timer off entirely for relaxed, untimed play.</p>
-        </div>
-      </details>
-
       <details class="rules-dropdown">
         <summary>How to Play <span class="chev">+</span></summary>
         <div class="rules-body">
@@ -796,8 +756,10 @@
           <p>Play locally against a friend, or switch to <b>vs AI</b> on the setup
           screen for a single-player practice opponent. The AI always plays second,
           its hand stays hidden (you'll just see face-down cards and a "Thinking…"
-          message), and it plays via a simple greedy heuristic — it's a reasonable
-          practice partner, not an unbeatable one.</p>
+          message). Pick <b>Easy</b> for a casual opponent that just grabs the best
+          move available right now, or <b>Hard</b> for one that looks several moves
+          ahead and guesses at your hidden hand from the cards it hasn't seen yet
+          — it never peeks at your cards, but expect a tough fight.</p>
 
           <h4>What Counts as a Legal Play</h4>
           <p>Think of a chain as a sentence that has to stay grammatically valid:</p>
@@ -848,7 +810,7 @@
           time-out penalty (&minus;5, &minus;10, &minus;15, or &minus;30 points),
           deducted from whoever let the clock run out — on either a main turn or a
           star-card bonus — specifically to discourage stalling on purpose to dodge a
-          bad position. See the Warning note above the rules for more on that.</p>
+          bad position. See the Warning note under the timer settings for more on that.</p>
 
           <h4>End of the Duel</h4>
           <p>The game ends the moment it becomes a player's turn and they have no
@@ -863,6 +825,54 @@
       <div style="text-align:center; margin:-6px 0 22px;">
         <a href="rules.html" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.05em; color:var(--muted); text-decoration:none; border-bottom:1px dotted var(--muted);">Open full rules as a shareable page &#8599;</a>
       </div>
+
+      <div class="field">        <label>Turn Timer</label>
+        <div class="timer-choice" id="timer-toggle">
+          <button type="button" class="chip selected" data-val="off">Off</button>
+          <button type="button" class="chip" data-val="on">On</button>
+        </div>
+      </div>
+      <div class="field timer-sub" id="difficulty-field">
+        <label>AI Difficulty</label>
+        <div class="timer-choice chips-disabled" id="difficulty-choice">
+          <button type="button" class="chip" data-val="easy">Easy</button>
+          <button type="button" class="chip selected" data-val="hard">Hard</button>
+        </div>
+      </div>
+
+      <div class="field timer-sub" id="seconds-field">
+        <label>Seconds Per Turn</label>
+        <div class="timer-choice chips-disabled" id="timer-choice">
+          <button type="button" class="chip" data-val="15">15s</button>
+          <button type="button" class="chip selected" data-val="30">30s</button>
+          <button type="button" class="chip" data-val="45">45s</button>
+          <button type="button" class="chip" data-val="60">60s</button>
+        </div>
+      </div>
+
+      <div class="field timer-sub" id="penalty-field">
+        <label>Time-Out Penalty</label>
+        <div class="timer-choice chips-disabled" id="penalty-choice">
+          <button type="button" class="chip" data-val="5">-5</button>
+          <button type="button" class="chip selected" data-val="10">-10</button>
+          <button type="button" class="chip" data-val="15">-15</button>
+          <button type="button" class="chip" data-val="30">-30</button>
+        </div>
+      </div>
+
+      <details class="warning-dropdown">
+        <summary>Warning <span class="chev">+</span></summary>
+        <div class="warning-body">
+          <p>Turning on a turn timer opens the door to a strategic exploit: a player
+          stuck with no good move can simply let the clock run out on purpose instead
+          of playing a bad card, effectively "passing" for free. The time-out penalty
+          above exists specifically to discourage this — every time-out, whether on a
+          main turn or a star-card bonus, docks that player points (scores can go
+          negative). Pick a penalty steep enough to make stalling not worth it, or
+          just leave the timer off entirely for relaxed, untimed play.</p>
+        </div>
+      </details>
+
       <button class="btn" id="start-btn">Deal &amp; Begin</button>
     </div>
   </div>
@@ -1403,7 +1413,10 @@
   function removeCardFromHand(id){
     const hand = state.players[state.turn].hand;
     const idx = hand.findIndex(c=>c.id===id);
-    if(idx>=0) hand.splice(idx,1);
+    if(idx>=0){
+      const removed = hand.splice(idx,1)[0];
+      if(state.playedCards) state.playedCards.push(removed);
+    }
   }
 
   function onSlotClick(idx){
@@ -1531,9 +1544,9 @@
   }
 
   // ---------------- AI Opponent ----------------
-  // A greedy 1-ply heuristic — not unbeatable, but a reasonable practice opponent.
-  // It always takes the best-scoring immediate move it can find; it doesn't plan
-  // multiple turns ahead or model what the human will do in response.
+  // The AI looks 4 plies ahead (its move, your reply, its move, your reply) while guessing
+  // at your hidden hand from the cards it hasn't seen yet. It never peeks at your cards.
+  // Easy difficulty uses the old greedy 1-ply heuristic below (also the fallback).
 
   function isAiTurn(){
     return !!(state && state.mode === 'ai' && state.turn === state.aiPlayerIndex && !state.gameOver);
@@ -1575,6 +1588,148 @@
     return 0.4 + (card.star ? 1.2 : 0) - riskPenalty + Math.random()*0.3;
   }
 
+  // ---- Search-based AI (determinized look-ahead) ----
+  // The AI can't see the human's hand. It tracks every card played so far, works out which
+  // cards are still unseen, deals the human a random hand from them, and runs a 4-ply
+  // alpha-beta search (AI, human, AI, human). It repeats that with several different
+  // random hands and plays the move that does best on average.
+  const AI_SEARCH_DEPTH = 4;
+  const AI_TIME_BUDGET_MS = 600;
+  const AI_MAX_SAMPLES = 24;
+
+  function aiCardKey(c){
+    return c.element + (c.kind==='number' ? 'n'+c.value : 'o'+c.op+(c.star?'*':''));
+  }
+  function fastCloneChain(c){
+    if(!c) return null;
+    return { element:c.element, tokens:c.tokens.slice(), display:c.display.slice(),
+             frames:c.frames.map(f=>({expectValue:f.expectValue, opCount:f.opCount, pendingDivide:f.pendingDivide})) };
+  }
+  function freshChainFor(card){
+    const ch = newChain(); ch.element = card.element; return ch;
+  }
+  function sLegalMoves(hand, chains){
+    const moves = [], seen = new Set();
+    const active = chains.filter(c=>c).length;
+    const firstEmpty = chains.findIndex(c=>c===null);
+    for(const card of hand){
+      const k = aiCardKey(card);
+      if(seen.has(k)) continue;
+      seen.add(k);
+      for(let i=0;i<3;i++){
+        const ch = chains[i];
+        if(ch === null){
+          if(i===firstEmpty && active<3 && canPlayOnChain(card, null)) moves.push({card, slot:i});
+        } else if(canPlayOnChain(card, ch) && !wouldDivideByZero(card, ch)){
+          moves.push({card, slot:i});
+        }
+      }
+    }
+    return moves;
+  }
+  function sBonusOptions(hand, chains, m){
+    if(!(m.card.kind==='op' && m.card.star)) return [];
+    const sim = fastCloneChain(chains[m.slot]) || freshChainFor(m.card);
+    applyCardToChain(m.card, sim);
+    if(isComplete(sim)) return [];
+    const out = [], seen = new Set();
+    for(const c of hand){
+      if(c === m.card || c.kind !== 'number') continue;
+      const k = aiCardKey(c);
+      if(seen.has(k)) continue;
+      seen.add(k);
+      if(canPlayOnChain(c, sim) && !wouldDivideByZero(c, sim)) out.push(c);
+    }
+    return out;
+  }
+  // S = {hands:[h0,h1], chains:[3], scores:[s0,s1]}; returns a new state after player p plays.
+  function sApply(S, p, m, bonus){
+    const N = { hands:[S.hands[0], S.hands[1]], chains:S.chains.slice(), scores:S.scores.slice() };
+    const hand = S.hands[p].slice();
+    hand.splice(hand.indexOf(m.card), 1);
+    let chain = fastCloneChain(S.chains[m.slot]) || freshChainFor(m.card);
+    applyCardToChain(m.card, chain);
+    if(bonus){
+      hand.splice(hand.indexOf(bonus), 1);
+      applyCardToChain(bonus, chain);
+    }
+    N.hands[p] = hand;
+    if(isComplete(chain)){
+      N.scores[p] += evalChain(chain);
+      N.chains[m.slot] = null;
+    } else {
+      N.chains[m.slot] = chain;
+    }
+    return N;
+  }
+  // Every (card, slot[, forced bonus]) option for player p. A star card is always followed by
+  // a bonus number when one exists (the same thing the live game's AI does).
+  function sOptions(S, p){
+    const out = [];
+    for(const m of sLegalMoves(S.hands[p], S.chains)){
+      const bo = sBonusOptions(S.hands[p], S.chains, m);
+      if(bo.length) bo.forEach(b=>out.push({m, bonus:b}));
+      else out.push({m, bonus:null});
+    }
+    return out;
+  }
+  function sSearch(S, p, d, alpha, beta){
+    const opts = sOptions(S, p);
+    if(!opts.length || d === 0) return S.scores[p] - S.scores[1-p];
+    const kids = opts.map(o=>{
+      const N = sApply(S, p, o.m, o.bonus);
+      return { N, g:N.scores[p]-S.scores[p] };
+    }).sort((a,b)=>b.g-a.g);
+    let best = -Infinity;
+    for(const k of kids){
+      const v = -sSearch(k.N, 1-p, d-1, -beta, -alpha);
+      if(v > best) best = v;
+      if(best > alpha) alpha = best;
+      if(alpha >= beta) break;
+    }
+    return best;
+  }
+  // Cards the AI has not seen: the full deck minus its own hand minus everything played.
+  function unseenCards(aiIdx){
+    const known = new Set(state.players[aiIdx].hand.map(c=>c.id));
+    (state.playedCards || []).forEach(c=>known.add(c.id));
+    return (state.fullDeck || []).filter(c=>!known.has(c.id));
+  }
+  function sampleHand(pool, size){
+    const a = pool.slice();
+    for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a.slice(0, size);
+  }
+  // Returns {m:{card,slot}, bonus:card|null}, or null if there's nothing to play.
+  function aiChoosePlay(aiIdx, budgetMs, depth, maxSamples){
+    const me = state.players[aiIdx].hand.slice();
+    const oppIdx = 1 - aiIdx;
+    const oppSize = state.players[oppIdx].hand.length;
+    const pool = unseenCards(aiIdx);
+    const chains = state.chains.map(fastCloneChain);
+    const rootOpts = sOptions({hands:[me, []], chains, scores:[0,0]}, 0);
+    if(!rootOpts.length) return null;
+    if(rootOpts.length === 1) return rootOpts[0];
+    const totals = new Array(rootOpts.length).fill(0);
+    const t0 = Date.now();
+    let samples = 0;
+    while(samples < maxSamples){
+      const opp = pool.length >= oppSize ? sampleHand(pool, oppSize) : pool.slice();
+      const S = { hands:[me, opp], chains, scores:[0,0] };
+      for(let i=0;i<rootOpts.length;i++){
+        const N = sApply(S, 0, rootOpts[i].m, rootOpts[i].bonus);
+        totals[i] += -sSearch(N, 1, depth-1, -Infinity, Infinity);
+      }
+      samples++;
+      if(Date.now() - t0 > budgetMs) break;
+    }
+    let bi = 0;
+    for(let i=1;i<totals.length;i++){
+      if(totals[i] > totals[bi] + 1e-9 || (Math.abs(totals[i]-totals[bi])<=1e-9 && Math.random()<0.5)) bi = i;
+    }
+    return rootOpts[bi];
+  }
+
   function collectLegalMoves(player){
     const moves = [];
     const openSlots = activeChainCount() < 3;
@@ -1608,7 +1763,16 @@
       endTurn();
       return;
     }
-    const move = pickBestMove(moves);
+    let move = null, plannedBonus = null;
+    try{
+      const plan = state.difficulty === 'easy' ? null : aiChoosePlay(state.turn, AI_TIME_BUDGET_MS, AI_SEARCH_DEPTH, AI_MAX_SAMPLES);
+      if(plan){
+        const real = moves.find(x=>x.card.id===plan.m.card.id && x.slotIdx===plan.m.slot)
+                  || moves.find(x=>aiCardKey(x.card)===aiCardKey(plan.m.card) && x.slotIdx===plan.m.slot);
+        if(real){ move = real; plannedBonus = plan.bonus; }
+      }
+    }catch(e){ move = null; }
+    if(!move) move = pickBestMove(moves); // safety net: the old greedy heuristic
     const idx = move.slotIdx;
     let chain = state.chains[idx];
     if(chain === null){
@@ -1628,7 +1792,10 @@
       const bonusCandidates = player.hand.filter(c=>c.kind==='number' && canPlayOnChain(c, chain) && !wouldDivideByZero(c, chain));
       if(bonusCandidates.length){
         let bestCard = null, bestScore = -Infinity;
-        for(const c of bonusCandidates){
+        if(plannedBonus){
+          bestCard = bonusCandidates.find(c=>aiCardKey(c)===aiCardKey(plannedBonus)) || null;
+        }
+        if(!bestCard) for(const c of bonusCandidates){
           const s = scoreCandidateMove(c, chain);
           if(s > bestScore){ bestScore = s; bestCard = c; }
         }
@@ -1758,6 +1925,15 @@
   });
 
   let selectedMode = 'pvp';
+  let selectedDifficulty = 'hard';
+  document.querySelectorAll('#difficulty-choice .chip').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if(selectedMode !== 'ai') return;
+      document.querySelectorAll('#difficulty-choice .chip').forEach(b=>b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedDifficulty = btn.dataset.val;
+    });
+  });
   document.getElementById('mode-toggle').querySelectorAll('.chip').forEach(btn=>{
     btn.addEventListener('click', ()=>{
       document.getElementById('mode-toggle').querySelectorAll('.chip').forEach(b=>b.classList.remove('selected'));
@@ -1767,9 +1943,11 @@
       const p2field = document.getElementById('p2-field');
       if(selectedMode === 'ai'){
         p2field.classList.add('chips-disabled');
+        document.getElementById('difficulty-choice').classList.remove('chips-disabled');
         p2input.value = 'AI Opponent';
       } else {
         p2field.classList.remove('chips-disabled');
+        document.getElementById('difficulty-choice').classList.add('chips-disabled');
         if(p2input.value === 'AI Opponent') p2input.value = '';
       }
     });
@@ -1801,6 +1979,8 @@
     const hand1 = deck.slice(handSize, handSize*2);
 
     state = {
+      fullDeck: deck.slice(),
+      playedCards: [],
       players: [
         {name:p1name, hand:hand0, score:0},
         {name:p2name, hand:hand1, score:0}
@@ -1812,6 +1992,7 @@
       turnSeconds: selectedTurnSeconds,
       penalty: selectedPenalty,
       mode: selectedMode,
+      difficulty: selectedDifficulty,
       aiPlayerIndex: selectedMode === 'ai' ? 1 : -1
     };
     selectedCardId = null;
